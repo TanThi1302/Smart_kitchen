@@ -5,10 +5,10 @@ const getAllProducts = async (req, res) => {
   try {
     const result = await pool.query(`
       SELECT 
-        p.*,
+        p.*, 
         c.name as category_name,
         c.slug as category_slug,
-        pi.image_url as primary_image
+        pi.image_url as images
       FROM products p
       LEFT JOIN categories c ON p.category_id = c.id
       LEFT JOIN product_images pi ON p.id = pi.product_id AND pi.is_primary = true
@@ -29,7 +29,7 @@ const getFeaturedProducts = async (req, res) => {
       SELECT 
         p.*,
         c.name as category_name,
-        pi.image_url as primary_image
+        pi.image_url as images
       FROM products p
       LEFT JOIN categories c ON p.category_id = c.id
       LEFT JOIN product_images pi ON p.id = pi.product_id AND pi.is_primary = true
@@ -92,7 +92,7 @@ const getProductsByCategory = async (req, res) => {
         p.*,
         c.name as category_name,
         c.slug as category_slug,
-        pi.image_url as primary_image
+        pi.image_url as images
       FROM products p
       LEFT JOIN categories c ON p.category_id = c.id
       LEFT JOIN product_images pi ON p.id = pi.product_id AND pi.is_primary = true
