@@ -8,18 +8,8 @@ const pool = new Pool({
   password: process.env.PGPASSWORD,
   database: process.env.PGDATABASE,
   port: process.env.PGPORT,
-  ssl: false,
+  ssl: false, 
 });
-
-(async () => {
-  try {
-    const res = await pool.query('SELECT NOW()');
-    console.log('✅ Connected to PostgreSQL at:', res.rows[0].now);
-  } catch (err) {
-    console.error('❌ Database connection failed:', err.message);
-  }
-})();
-
 
 pool.on('error', (err) => {
   console.error('Unexpected error on idle PostgreSQL client', err);
