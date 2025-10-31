@@ -12,7 +12,7 @@ Website thương mại điện tử bán thiết bị nhà bếp, xây dựng b�
 - **Data Fetching**: TanStack Query
 - **Routing**: React Router v6
 
-### Các trang chức năng (Đã hoàn thành cấu trúc)
+### Các trang chức năng
 
 1. ✅ **Trang chủ** - Banner, danh mục nổi bật, sản phẩm featured
 2. ✅ **Trang sản phẩm** - Danh sách, bộ lọc, tìm kiếm, phân trang
@@ -24,70 +24,89 @@ Website thương mại điện tử bán thiết bị nhà bếp, xây dựng b�
 8. ✅ **Liên hệ & Tuyển dụng** - Form liên hệ, danh sách vị trí tuyển dụng
 9. ✅ **Admin CMS** - Quản lý sản phẩm, bài viết, đơn hàng
 
-## 🚀 Hướng dẫn cài đặt
+## 🚀 Quickstart - Chạy dự án trong 2 phút
 
-### 1. Cài đặt Docker và PostgreSQL
+### Yêu cầu
+- Node.js 18+ ([Download](https://nodejs.org/))
+- Docker Desktop ([Download](https://www.docker.com/products/docker-desktop/))
+- Git ([Download](https://git-scm.com/))
 
+### Các bước thực hiện
+
+**1. Clone repository**
 ```bash
-# Khởi động PostgreSQL container
-docker-compose up -d
-
-# Kiểm tra container đang chạy
-docker ps
+git clone https://github.com/TanThi1302/Smart_kitchen.git
+cd Smart_kitchen
+git checkout product-admin
 ```
+
+**2. Cài đặt dependencies**
+```bash
+npm run install:all
+```
+
+**3. Khởi động database**
+```bash
+docker-compose up -d
+```
+
+**4. Chạy ứng dụng**
+```bash
+npm run dev
+```
+
+**5. Mở trình duyệt**
+- Frontend: http://localhost:5173
+- Backend API: http://localhost:5000
+- Health Check: http://localhost:5000/health
+
+✅ **Done!** Ứng dụng đã sẵn sàng!
+
+---
+
+## 📝 Hướng dẫn chi tiết
+
+### Cấu hình Database
 
 Database sẽ tự động khởi tạo với:
-- Database: `kitchen_ecommerce`
-- Username: `admin`
-- Password: `admin123`
-- Port: `5432`
-
-### 2. Cài đặt Backend
+- **Database**: `kitchen_ecommerce`
+- **Username**: `admin`
+- **Password**: `admin123`
+- **Port**: `5432`
+- **Schema & Sample Data**: Tự động load từ `database/init.sql`
 
 ```bash
-cd backend
-npm install
-npm run dev
+# Kiểm tra container đang chạy
+docker ps
+
+# Xem logs database
+docker-compose logs -f postgres
+
+# Dừng database
+docker-compose down
+
+# Reset database (xóa data và tạo lại)
+docker-compose down -v
+docker-compose up -d
 ```
 
-Backend sẽ chạy tại: `http://localhost:5000`
-
-### 3. Cài đặt Frontend
+### Các lệnh Development
 
 ```bash
-cd frontend
-npm install
-
-# Cài đặt tailwindcss-animate (dependency của ShadcnUI)
-npm install tailwindcss-animate
-
-# Chạy development server
+# Chạy Backend + Frontend cùng lúc
 npm run dev
-```
 
-Frontend sẽ chạy tại: `http://localhost:5173`
+# Chạy riêng Backend
+npm run dev:backend
 
-### 4. Cài đặt ShadcnUI Components
+# Chạy riêng Frontend
+npm run dev:frontend
 
-```bash
-cd frontend
+# Build production
+npm run build
 
-# Init shadcn (nếu chưa init)
-npx shadcn-ui@latest init
-
-# Cài đặt các components cần thiết
-npx shadcn-ui@latest add button
-npx shadcn-ui@latest add card
-npx shadcn-ui@latest add input
-npx shadcn-ui@latest add label
-npx shadcn-ui@latest add select
-npx shadcn-ui@latest add dialog
-npx shadcn-ui@latest add dropdown-menu
-npx shadcn-ui@latest add toast
-npx shadcn-ui@latest add badge
-npx shadcn-ui@latest add table
-npx shadcn-ui@latest add tabs
-npx shadcn-ui@latest add separator
+# Preview production build
+npm run start:frontend
 ```
 
 ## 📁 Cấu trúc dự án
@@ -293,36 +312,92 @@ npm start
 - [ ] Wishlist
 - [ ] Product comparison
 
-## 🐛 Troubleshooting
+## 🐛 Xử lý lỗi thường gặp
 
-### Lỗi kết nối database:
+### ❌ Docker không chạy?
 ```bash
-# Kiểm tra PostgreSQL đang chạy
+# 1. Cài Docker Desktop từ docker.com
+# 2. Mở Docker Desktop và đợi nó khởi động
+# 3. Chạy lại:
+docker-compose up -d
+
+# Kiểm tra Docker:
+docker --version
+docker ps
+```
+
+### ❌ Lỗi kết nối database
+```bash
+# Kiểm tra container đang chạy
 docker ps
 
 # Restart container
-docker-compose restart
+docker-compose down
+docker-compose up -d
 
-# Check logs
-docker-compose logs postgres
+# Xem logs
+docker-compose logs -f postgres
+
+# Reset database (xóa data và tạo lại)
+docker-compose down -v
+docker-compose up -d
 ```
 
-### Lỗi CORS:
+### ❌ Port 5000 hoặc 5173 bị chiếm
+```bash
+# Backend - Tạo file backend/.env
+PORT=5001
+
+# Frontend - Thay đổi trong frontend/vite.config.js
+server: {
+  port: 5174
+}
+
+# PostgreSQL - Thay đổi trong docker-compose.yml
+ports:
+  - "5433:5432"
+```
+
+### ❌ "Cannot find module" hoặc lỗi dependencies
+```bash
+# Xóa và cài lại
+rm -rf node_modules package-lock.json
+npm install
+
+cd backend
+rm -rf node_modules package-lock.json
+npm install
+
+cd ../frontend
+rm -rf node_modules package-lock.json
+npm install
+```
+
+### ❌ Git clone failed (SSH key)
+```bash
+# Nếu clone bằng SSH không được, dùng HTTPS:
+git clone https://github.com/TanThi1302/Smart_kitchen.git
+```
+
+### ❌ Lỗi CORS
 - Kiểm tra `backend/src/server.js` đã config CORS đúng origin
 - Frontend URL mặc định: `http://localhost:5173`
+- Backend CORS đã được config cho `http://localhost:5173`
 
-### Port đã được sử dụng:
-- Backend (5000): Thay đổi trong `.env`
-- Frontend (5173): Thay đổi trong `vite.config.js`
-- PostgreSQL (5432): Thay đổi trong `docker-compose.yml`
+## 📞 Hỗ trợ & Tài nguyên
 
-## 📞 Support
+### Debug
+- Check console logs trong browser (F12)
+- Check terminal logs của backend/frontend
+- Xem logs database: `docker-compose logs -f`
 
-Nếu gặp vấn đề, vui lòng:
-1. Kiểm tra logs của các services
-2. Verify database connection
-3. Clear node_modules và reinstall
-4. Check console errors trong browser
+### Tài liệu tham khảo
+- **SETUP_GUIDE.md** - Hướng dẫn chi tiết từng bước
+- **TEST_ADMIN.md** - Hướng dẫn test chức năng Admin
+- React: https://react.dev
+- Vite: https://vitejs.dev
+- ShadcnUI: https://ui.shadcn.com
+- TailwindCSS: https://tailwindcss.com
 
 ## 📄 License
 
