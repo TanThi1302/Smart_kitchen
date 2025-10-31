@@ -247,7 +247,7 @@ Website đã được thiết kế dựa trên:
 - **Tablet**: 2 cột grid, menu collapse
 - **Mobile**: 1 cột, bottom navigation, hamburger menu
 
-##  Xử lý lỗi thường gặp
+## Xử lý lỗi thường gặp
 
 ### ❌ Docker không chạy?
 
@@ -324,11 +324,3 @@ git clone https://github.com/TanThi1302/Smart_kitchen.git
 - Kiểm tra `backend/src/server.js` đã config CORS đúng origin
 - Frontend URL mặc định: `http://localhost:5173`
 - Backend CORS đã được config cho `http://localhost:5173`
-
-##  License
-
-MIT License - Dự án học tập
-
----
-
-**Lưu ý**: Đây là dự án demo, không nên sử dụng trực tiếp trong production mà không có security hardening.
