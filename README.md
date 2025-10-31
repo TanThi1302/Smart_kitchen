@@ -5,6 +5,7 @@ Website thương mại điện tử bán thiết bị nhà bếp, xây dựng b�
 ## 📋 Tổng quan dự án
 
 ### Công nghệ sử dụng
+
 - **Frontend**: React 18 + Vite + ShadcnUI + Tailwind CSS
 - **Backend**: Node.js + Express
 - **Database**: PostgreSQL 16 (Docker)
@@ -27,6 +28,7 @@ Website thương mại điện tử bán thiết bị nhà bếp, xây dựng b�
 ## 🚀 Quickstart - Chạy dự án trong 2 phút
 
 ### Yêu cầu
+
 - Node.js 18+ ([Download](https://nodejs.org/))
 - Docker Desktop ([Download](https://www.docker.com/products/docker-desktop/))
 - Git ([Download](https://git-scm.com/))
@@ -34,6 +36,7 @@ Website thương mại điện tử bán thiết bị nhà bếp, xây dựng b�
 ### Các bước thực hiện
 
 **1. Clone repository**
+
 ```bash
 git clone https://github.com/TanThi1302/Smart_kitchen.git
 cd Smart_kitchen
@@ -41,21 +44,37 @@ git checkout product-admin
 ```
 
 **2. Cài đặt dependencies**
+
 ```bash
 npm run install:all
 ```
 
-**3. Khởi động database**
+**3. Tạo file cấu hình môi trường**
+
+```bash
+# Windows (PowerShell)
+Copy-Item backend\.env.example backend\.env
+Copy-Item frontend\.env.example frontend\.env
+
+# Linux/Mac
+cp backend/.env.example backend/.env
+cp frontend/.env.example frontend/.env
+```
+
+**4. Khởi động database**
+
 ```bash
 docker-compose up -d
 ```
 
-**4. Chạy ứng dụng**
+**5. Chạy ứng dụng**
+
 ```bash
 npm run dev
 ```
 
-**5. Mở trình duyệt**
+**6. Mở trình duyệt**
+
 - Frontend: http://localhost:5173
 - Backend API: http://localhost:5000
 - Health Check: http://localhost:5000/health
@@ -69,6 +88,7 @@ npm run dev
 ### Cấu hình Database
 
 Database sẽ tự động khởi tạo với:
+
 - **Database**: `kitchen_ecommerce`
 - **Username**: `admin`
 - **Password**: `admin123`
@@ -159,6 +179,7 @@ kitchen-ecommerce/
 ## 🗄️ Database Schema
 
 ### Các bảng chính:
+
 - **categories** - Danh mục sản phẩm
 - **products** - Sản phẩm (name, price, stock, specifications...)
 - **product_images** - Hình ảnh sản phẩm
@@ -173,6 +194,7 @@ kitchen-ecommerce/
 ## 🔌 API Endpoints
 
 ### Products
+
 - `GET /api/products` - Lấy danh sách sản phẩm (có pagination, filter, search)
 - `GET /api/products/featured` - Lấy sản phẩm nổi bật
 - `GET /api/products/:slug` - Chi tiết sản phẩm
@@ -181,16 +203,19 @@ kitchen-ecommerce/
 - `DELETE /api/admin/products/:id` - Xóa sản phẩm (Admin)
 
 ### Categories
+
 - `GET /api/categories` - Lấy tất cả danh mục
 - `GET /api/categories/:slug` - Chi tiết danh mục
 
 ### Orders
+
 - `POST /api/orders` - Tạo đơn hàng mới (Checkout)
 - `GET /api/orders/:id` - Chi tiết đơn hàng
 - `GET /api/admin/orders` - Lấy tất cả đơn hàng (Admin)
 - `PUT /api/admin/orders/:id/status` - Cập nhật trạng thái đơn hàng (Admin)
 
 ### Posts (News)
+
 - `GET /api/posts` - Lấy danh sách bài viết
 - `GET /api/posts/:slug` - Chi tiết bài viết
 - `POST /api/admin/posts` - Tạo bài viết mới (Admin)
@@ -198,6 +223,7 @@ kitchen-ecommerce/
 - `DELETE /api/admin/posts/:id` - Xóa bài viết (Admin)
 
 ### Other
+
 - `GET /api/promotions` - Lấy danh sách khuyến mãi
 - `GET /api/jobs` - Lấy danh sách tuyển dụng
 - `POST /api/contact` - Gửi tin nhắn liên hệ
@@ -206,6 +232,7 @@ kitchen-ecommerce/
 ## 🎨 Tham khảo UI/UX từ malloca.com
 
 Website đã được thiết kế dựa trên:
+
 - Giao diện hiện đại, clean
 - Màu chủ đạo: Xanh dương (#0066CC)
 - Layout responsive cho mobile
@@ -270,11 +297,13 @@ npm start
 ### Frontend (Cần tạo thêm các file component):
 
 1. **Layout Components**
+
    - `src/components/layout/Header.jsx`
    - `src/components/layout/Footer.jsx`
    - `src/components/layout/Navigation.jsx`
 
 2. **Pages**
+
    - `src/pages/Home.jsx`
    - `src/pages/Products.jsx`
    - `src/pages/ProductDetail.jsx`
@@ -287,6 +316,7 @@ npm start
    - `src/pages/admin/*`
 
 3. **Services & Store**
+
    - `src/services/api.js`
    - `src/store/cartStore.js`
    - `src/utils/helpers.js`
@@ -297,12 +327,14 @@ npm start
    - `index.html`
 
 ### Backend (Đã hoàn thành):
+
 - ✅ Database schema
 - ✅ All controllers
 - ✅ Routes
 - ✅ Server setup
 
 ### Tính năng bổ sung (Optional):
+
 - [ ] Authentication với JWT
 - [ ] Upload hình ảnh real
 - [ ] Email notification
@@ -315,6 +347,7 @@ npm start
 ## 🐛 Xử lý lỗi thường gặp
 
 ### ❌ Docker không chạy?
+
 ```bash
 # 1. Cài Docker Desktop từ docker.com
 # 2. Mở Docker Desktop và đợi nó khởi động
@@ -327,6 +360,7 @@ docker ps
 ```
 
 ### ❌ Lỗi kết nối database
+
 ```bash
 # Kiểm tra container đang chạy
 docker ps
@@ -344,6 +378,7 @@ docker-compose up -d
 ```
 
 ### ❌ Port 5000 hoặc 5173 bị chiếm
+
 ```bash
 # Backend - Tạo file backend/.env
 PORT=5001
@@ -359,6 +394,7 @@ ports:
 ```
 
 ### ❌ "Cannot find module" hoặc lỗi dependencies
+
 ```bash
 # Xóa và cài lại
 rm -rf node_modules package-lock.json
@@ -374,12 +410,14 @@ npm install
 ```
 
 ### ❌ Git clone failed (SSH key)
+
 ```bash
 # Nếu clone bằng SSH không được, dùng HTTPS:
 git clone https://github.com/TanThi1302/Smart_kitchen.git
 ```
 
 ### ❌ Lỗi CORS
+
 - Kiểm tra `backend/src/server.js` đã config CORS đúng origin
 - Frontend URL mặc định: `http://localhost:5173`
 - Backend CORS đã được config cho `http://localhost:5173`
@@ -387,11 +425,13 @@ git clone https://github.com/TanThi1302/Smart_kitchen.git
 ## 📞 Hỗ trợ & Tài nguyên
 
 ### Debug
+
 - Check console logs trong browser (F12)
 - Check terminal logs của backend/frontend
 - Xem logs database: `docker-compose logs -f`
 
 ### Tài liệu tham khảo
+
 - **SETUP_GUIDE.md** - Hướng dẫn chi tiết từng bước
 - **TEST_ADMIN.md** - Hướng dẫn test chức năng Admin
 - React: https://react.dev
