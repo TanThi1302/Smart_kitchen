@@ -75,6 +75,7 @@ CREATE TABLE posts (
   thumbnail_url VARCHAR(500),
   category VARCHAR(100),
   author VARCHAR(255),
+  post_type VARCHAR(50),
   is_published BOOLEAN DEFAULT false,
   published_at TIMESTAMP,
   created_at TIMESTAMP DEFAULT NOW(),
@@ -200,53 +201,69 @@ INSERT INTO promotions (title, description, discount_percent, start_date, end_da
 
 -- Insert sample posts
 INSERT INTO posts 
-(title, slug, content, excerpt, thumbnail_url, category, author, is_published, published_at)
+(title, slug, content, excerpt, thumbnail_url, category, author, post_type, is_published, published_at)
 VALUES
 (
   'Bếp từ thông minh – Giải pháp hiện đại cho căn bếp Việt',
   'bep-tu-thong-minh',
-  'Bếp từ ngày càng trở thành lựa chọn phổ biến trong các gia đình hiện đại nhờ tính an toàn, hiệu suất cao và thiết kế sang trọng. Trong bài viết này, chúng ta sẽ cùng tìm hiểu về những ưu điểm nổi bật của bếp từ và cách chọn lựa sản phẩm phù hợp cho căn bếp của bạn.',
-  'Bếp từ ngày càng được ưa chuộng nhờ hiệu suất cao và độ an toàn tuyệt đối.',
+  'Bếp từ ngày càng trở thành lựa chọn phổ biến...',
+  'Bếp từ ngày càng được ưa chuộng...',
   'https://placehold.co/600x600/0066CC/FFFFFF/png?text=Bep+Tu+Doi',
   'Bếp từ',
   'Admin',
+  'tin-tuc',
   true,
   NOW()
 ),
 (
   'Máy hút mùi – Giữ cho không gian bếp luôn trong lành',
   'may-hut-mui-hien-dai',
-  'Máy hút mùi giúp loại bỏ khói, dầu mỡ và mùi thức ăn, mang lại không gian bếp thoáng đãng và dễ chịu. Hãy cùng khám phá những mẫu máy hút mùi hiện đại, tiết kiệm điện và phù hợp với nhiều loại không gian khác nhau.',
-  'Giữ không gian bếp trong lành với máy hút mùi công nghệ cao.',
-  'https://placehold.co/600x600/0066CC/FFFFFF/png?text=Bep+Tu+Doi',
+  'Máy hút mùi giúp loại bỏ khói, dầu mỡ...',
+  'Giữ không gian bếp trong lành...',
+  'https://placehold.co/600x600/0066CC/FFFFFF/png?text=May+Hut+Mui',
   'Máy hút mùi',
   'Admin',
-  true,
-  NOW()
-),
-
-(
-  'Chậu rửa inox cao cấp – Sự lựa chọn hoàn hảo cho căn bếp hiện đại',
-  'chau-rua-inox-cao-cap',
-  'Chậu rửa inox không chỉ bền bỉ mà còn mang lại vẻ sang trọng và tiện dụng. Bài viết này sẽ giúp bạn tìm hiểu về các loại chậu rửa phổ biến, cách chọn kích thước phù hợp và mẹo bảo quản chậu rửa luôn sáng bóng.',
-  'Tìm hiểu cách chọn chậu rửa inox phù hợp cho căn bếp của bạn.',
-  'https://placehold.co/600x600/0066CC/FFFFFF/png?text=Bep+Tu+Doi',
-  'Chậu rửa',
-  'Admin',
+  'tin-tuc',
   true,
   NOW()
 ),
 (
-  'Lò nướng đa năng – Bí quyết cho món ăn chuẩn vị nhà hàng',
-  'lo-nuong-da-nang',
-  'Lò nướng là thiết bị không thể thiếu cho những ai yêu thích nấu nướng. Từ nướng bánh, thịt đến hải sản – tất cả đều trở nên dễ dàng và thơm ngon hơn với lò nướng hiện đại. Cùng khám phá các tính năng mới nhất giúp bạn tối ưu trải nghiệm nấu ăn.',
-  'Khám phá các mẫu lò nướng đa năng, tiện ích cho mọi gia đình.',
-  'https://placehold.co/600x600/0066CC/FFFFFF/png?text=Bep+Tu+Doi',
-  'Lò nướng',
+  'Ưu đãi đặc biệt Malloca 2025 – Giảm đến 30%',
+  'uu-dai-malloca-2025',
+  'Chương trình khuyến mãi lớn nhất năm dành cho khách hàng Malloca...',
+  'Giảm giá đến 30% cho các sản phẩm bếp và thiết bị nhà bếp cao cấp.',
+  'https://placehold.co/600x600/FF6600/FFFFFF/png?text=Khuyen+Mai',
+  'Khuyến mãi',
   'Admin',
+  'khuyen-mai',
+  true,
+  NOW()
+),
+(
+  'Malloca tại Vietbuild 2025 – Không gian bếp thông minh',
+  'malloca-vietbuild-2025',
+  'Malloca tham dự triển lãm Vietbuild 2025 với các sản phẩm công nghệ mới...',
+  'Khám phá xu hướng bếp thông minh tại Vietbuild 2025.',
+  'https://placehold.co/600x600/009900/FFFFFF/png?text=Su+Kien',
+  'Sự kiện',
+  'Admin',
+  'su-kien',
+  true,
+  NOW()
+),
+(
+  '5 mẹo giữ bếp luôn sạch sẽ',
+  '5-meo-giu-bep-sach',
+  'Cẩm nang giúp căn bếp của bạn luôn gọn gàng và sạch sẽ...',
+  'Bí quyết giữ bếp sáng bóng mỗi ngày.',
+  'https://placehold.co/600x600/0066FF/FFFFFF/png?text=Cam+Nang+Bep',
+  'Cẩm nang bếp',
+  'Admin',
+  'cam-nang-bep',
   true,
   NOW()
 );
+
 
 -- Insert sample admin user (password: admin123)
 INSERT INTO users (email, password_hash, full_name, role) VALUES
