@@ -31,6 +31,12 @@ export const getPromotions = () => api.get('/promotions');
 export const getJobPostings = () => api.get('/jobs');
 export const submitContactMessage = (data) => api.post('/contact', data);
 
+// Product Images
+export const getProductImages = (productId) => api.get(`/products/${productId}/images`);
+export const adminAddProductImage = (productId, data) => api.post(`/admin/products/${productId}/images`, data);
+export const adminUpdateProductImage = (imageId, data) => api.put(`/admin/products/images/${imageId}`, data);
+export const adminDeleteProductImage = (imageId) => api.delete(`/admin/products/images/${imageId}`);
+
 // Admin APIs
 export const adminCreateProduct = (data) => api.post('/admin/products', data);
 export const adminUpdateProduct = (id, data) => api.put(`/admin/products/${id}`, data);

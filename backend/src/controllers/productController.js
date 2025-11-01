@@ -178,3 +178,98 @@ exports.deleteProduct = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
+
+// Get product images
+exports.getProductImages = async (req, res) => {
+  try {
+    const { productId } = req.params;
+
+    const query = 'SELECT * FROM product_images WHERE product_id = $1 ORDER BY display_order';
+    const result = await db.query(query, [productId]);
+
+    res.json({ success: true, data: result.rows });
+  } catch (error) {
+    console.error('Error fetching product images:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+// Admin: Add product image
+exports.addProductImage = async (req, res) => {
+  try {
+    const { productId } = req.params;
+    const { image_url, is_primary = false, display_order = 0 } = req.body;
+
+    // If setting as primary, unset other primary images
+    if (is_primary) {
+      await db.query('UPDATE product_images SET is_primary = false WHERE product_id = $1', [productId]);
+    }
+
+    const query = `
+      INSERT INTO product_images (product_id, image_url, is_primary, display_order)
+      VALUES ($1, $2, $3, $4)
+      RETURNING *
+    `;
+    const values = [productId, image_url, is_primary, display_order];
+    const result = await db.query(query, values);
+
+    res.status(201).json({ success: true, data: result.rows[0] });
+  } catch (error) {
+    console.error('Error adding product image:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+// Admin: Update product image
+exports.updateProductImage = async (req, res) => {
+  try {
+    const { imageId } = req.params;
+    const { image_url, is_primary, display_order } = req.body;
+
+    // If setting as primary, unset other primary images for this product
+    if (is_primary) {
+      const productQuery = 'SELECT product_id FROM product_images WHERE id = $1';
+      const productResult = await db.query(productQuery, [imageId]);
+      if (productResult.rows.length > 0) {
+        await db.query('UPDATE product_images SET is_primary = false WHERE product_id = $1', [productResult.rows[0].product_id]);
+      }
+    }
+
+    const query = `
+      UPDATE product_images
+      SET image_url = $1, is_primary = $2, display_order = $3
+      WHERE id = $4
+      RETURNING *
+    `;
+    const values = [image_url, is_primary, display_order, imageId];
+    const result = await db.query(query, values);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Product image not found' });
+    }
+
+    res.json({ success: true, data: result.rows[0] });
+  } catch (error) {
+    console.error('Error updating product image:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+// Admin: Delete product image
+exports.deleteProductImage = async (req, res) => {
+  try {
+    const { imageId } = req.params;
+
+    const query = 'DELETE FROM product_images WHERE id = $1 RETURNING id';
+    const result = await db.query(query, [imageId]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Product image not found' });
+    }
+
+    res.json({ success: true, message: 'Product image deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting product image:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { ShoppingCart, Menu, Search, X } from 'lucide-react'
+import { ShoppingCart, Menu, Search, X, Utensils, ChefHat } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import useCartStore from '@/store/cartStore'
 import { useState } from 'react'
@@ -14,7 +14,12 @@ export default function Header() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="text-2xl font-bold text-primary hover:text-primary/80 transition-colors">
-            Kitchen Store
+            <div className="flex items-center gap-3 mb-4">
+              <div className="bg-white/20 p-2 rounded-lg">
+                <ChefHat className="h-6 w-6" />
+              </div>
+              <h3 className="text-xl font-bold">Kitchen Store</h3>
+            </div>
           </Link>
 
           {/* Desktop Navigation */}

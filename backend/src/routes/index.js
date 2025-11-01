@@ -35,6 +35,12 @@ router.post('/admin/products', productController.createProduct);
 router.put('/admin/products/:id', productController.updateProduct);
 router.delete('/admin/products/:id', productController.deleteProduct);
 
+// Product Images
+router.get('/products/:productId/images', productController.getProductImages);
+router.post('/admin/products/:productId/images', productController.addProductImage);
+router.put('/admin/products/images/:imageId', productController.updateProductImage);
+router.delete('/admin/products/images/:imageId', productController.deleteProductImage);
+
 // Categories
 router.post('/admin/categories', categoryController.createCategory);
 router.put('/admin/categories/:id', categoryController.updateCategory);
