@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
-import { getFeaturedProducts, getPromotions } from '@/services/api'
+import { getFeaturedProducts, getPromotions, getCategories } from '@/services/api'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -25,9 +25,18 @@ export default function Home() {
     },
   })
 
+  const { data: categoriesData } = useQuery({
+    queryKey: ['categories'],
+    queryFn: async () => {
+      const res = await getCategories()
+      return res.data
+    },
+  })
+
   const addItem = useCartStore((state) => state.addItem)
   const products = productsData?.data || []
   const promotions = promotionsData?.data || []
+  const categories = categoriesData?.data || []
 
   const handleAddToCart = (product) => {
     addItem(product)
@@ -37,20 +46,48 @@ export default function Home() {
   return (
     <div>
       {/* Hero Banner */}
-      <section className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-20 md:py-32">
-        <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-6xl font-bold mb-4 animate-fade-in">
-            Thiết Bị Nhà Bếp Hiện Đại
-          </h1>
-          <p className="text-xl md:text-2xl mb-8 text-blue-100">
-            Chất lượng cao - Giá cả hợp lý - Bảo hành dài hạn
-          </p>
-          <Link to="/products">
-            <Button size="lg" variant="secondary" className="text-lg px-8 py-6">
-              Khám Phá Ngay
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
-          </Link>
+      <section className="relative bg-gradient-to-r from-blue-700 to-blue-350 text-white">
+        <div className="container mx-auto px-4 py-20">
+          <div className="grid md:grid-cols-2 gap-8 items-center">
+            <div>
+              <h1 className="text-4xl md:text-5xl font-bold mb-4">
+                SMART KITCHEN, SMART LIFE
+              </h1>
+              <p className="text-xl mb-6 text-blue-100">
+                Tinh tế và đẳng cấp đến từng chi tiết!
+              </p>
+              <p className="text-lg mb-8 text-blue-100">
+                Thiết bị nhà bếp cao cấp từ Đức - Công nghệ hiện đại, bền bỉ theo thời gian
+              </p>
+              <div className="flex gap-4">
+                <Link 
+                  to="/products" 
+                  className="bg-white text-primary px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition"
+                >
+                  Xem sản phẩm
+                </Link>
+                <Link 
+                  to="/contact" 
+                  className="border-2 border-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-primary transition"
+                >
+                  Liên hệ ngay
+                </Link>
+              </div>
+            </div>
+            <div className="hidden md:block">
+              <img 
+                src="/images/banner/banner.jpg" 
+                alt="Modern Kitchen" 
+                className="rounded-lg shadow-2xl"
+              />
+            </div>
+          </div>
+        </div>
+        {/* Wave decoration */}
+        <div className="absolute bottom-0 left-0 right-0">
+          <svg viewBox="0 0 1440 120" className="w-full h-auto">
+            <path fill="#f9fafb" d="M0,64L80,69.3C160,75,320,85,480,80C640,75,800,53,960,48C1120,43,1280,53,1360,58.7L1440,64L1440,120L1360,120C1280,120,1120,120,960,120C800,120,640,120,480,120C320,120,160,120,80,120L0,120Z"></path>
+          </svg>
         </div>
       </section>
 
@@ -79,6 +116,45 @@ export default function Home() {
                 </CardContent>
               </Card>
             ))}
+          </div>
+        </section>
+      )}
+
+      {/* Categories Section */}
+      {categories.length > 0 && (
+        <section className="py-16 bg-white">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold text-gray-800 mb-4">Danh mục sản phẩm</h2>
+              <p className="text-gray-600">Khám phá các dòng sản phẩm chất lượng cao</p>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+              {categories.map((category) => (
+                <Link
+                  key={category.id}
+                  to={`/category/${category.slug}`}
+                  className="bg-white rounded-lg p-6 text-center hover:shadow-lg transition-all duration-300 border border-gray-100 group"
+                >
+                  <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-primary/20 transition-colors overflow-hidden">
+                    {category.image ? (
+                      <img 
+                        src={category.image} 
+                        alt={category.name}
+                        className="w-12 h-12 object-contain"
+                      />
+                    ) : (
+                      <ShoppingCart className="w-10 h-10 text-primary" />
+                    )}
+                  </div>
+                  <h3 className="font-semibold text-gray-800 group-hover:text-primary transition-colors">
+                    {category.name}
+                  </h3>
+                  <p className="text-sm text-gray-500 mt-1">
+                    {category.product_count || 0} sản phẩm
+                  </p>
+                </Link>
+              ))}
+            </div>
           </div>
         </section>
       )}

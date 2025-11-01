@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 import React from 'react';
 
 const About = () => {
@@ -12,6 +13,9 @@ const About = () => {
 
 export default About;
 =======
+=======
+
+>>>>>>> 675b4aab2c42009b23c0b163ad6af8de73116818
 import { Card, CardContent } from '@/components/ui/card'
 import { Shield, Award, Users, Truck } from 'lucide-react'
 
@@ -146,4 +150,8 @@ export default function About() {
     </div>
   )
 }
+<<<<<<< HEAD
 >>>>>>> product-admin
+=======
+
+>>>>>>> 675b4aab2c42009b23c0b163ad6af8de73116818

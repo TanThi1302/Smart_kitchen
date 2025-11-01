@@ -1,21 +1,28 @@
 import axios from 'axios';
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 const API_BASE_URL = 'http://localhost:5000/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
 =======
+=======
+>>>>>>> 675b4aab2c42009b23c0b163ad6af8de73116818
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 const api = axios.create({
   baseURL: API_URL,
+<<<<<<< HEAD
 >>>>>>> product-admin
+=======
+>>>>>>> 675b4aab2c42009b23c0b163ad6af8de73116818
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 // Products API
 export const productAPI = {
@@ -38,6 +45,8 @@ export const promotionAPI = {
 
 export default api;
 =======
+=======
+>>>>>>> 675b4aab2c42009b23c0b163ad6af8de73116818
 // Products
 export const getProducts = (params) => api.get('/products', { params });
 export const getFeaturedProducts = () => api.get('/products/featured');
@@ -79,4 +88,7 @@ export const adminDeletePost = (id) => api.delete(`/admin/posts/${id}`);
 export const adminGetContactMessages = (params) => api.get('/admin/contact-messages', { params });
 
 export default api;
+<<<<<<< HEAD
 >>>>>>> product-admin
+=======
+>>>>>>> 675b4aab2c42009b23c0b163ad6af8de73116818

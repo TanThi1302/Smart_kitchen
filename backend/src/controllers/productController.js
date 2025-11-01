@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 const pool = require('../config/database');
 
 // Lấy tất cả sản phẩm
@@ -116,6 +117,9 @@ module.exports = {
   getProductsByCategory
 };
 =======
+=======
+
+>>>>>>> 675b4aab2c42009b23c0b163ad6af8de73116818
 const db = require('../config/database');
 
 // Get all products with pagination and filters
@@ -297,6 +301,7 @@ exports.deleteProduct = async (req, res) => {
   }
 };
 
+<<<<<<< HEAD
 // Get product images
 exports.getProductImages = async (req, res) => {
   try {
@@ -392,3 +397,5 @@ exports.deleteProductImage = async (req, res) => {
   }
 };
 >>>>>>> product-admin
+=======
+>>>>>>> 675b4aab2c42009b23c0b163ad6af8de73116818

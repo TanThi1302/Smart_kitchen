@@ -3,6 +3,7 @@ require('dotenv').config();
 
 const pool = new Pool({
 <<<<<<< HEAD
+<<<<<<< HEAD
   user: process.env.DB_USER,
   host: process.env.DB_HOST,
   database: process.env.DB_NAME,
@@ -20,6 +21,8 @@ pool.on('error', (err) => {
 
 module.exports = pool;
 =======
+=======
+>>>>>>> 675b4aab2c42009b23c0b163ad6af8de73116818
   host: process.env.DB_HOST,
   port: process.env.DB_PORT,
   database: process.env.DB_NAME,
@@ -40,4 +43,8 @@ module.exports = {
   query: (text, params) => pool.query(text, params),
   pool,
 };
+<<<<<<< HEAD
 >>>>>>> product-admin
+=======
+
+>>>>>>> 675b4aab2c42009b23c0b163ad6af8de73116818

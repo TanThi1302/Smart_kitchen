@@ -6,6 +6,8 @@ const categoryController = require('../controllers/categoryController');
 
 const promotionController = require('../controllers/promotionController');
 
+
+
 const orderController = require('../controllers/orderController');
 const postController = require('../controllers/postController');
 const contactController = require('../controllers/contactController');
@@ -16,7 +18,10 @@ router.get('/products', productController.getAllProducts);
 router.get('/products/featured', productController.getFeaturedProducts);
 router.get('/products/:slug', productController.getProductBySlug);
 
+
 router.get('/categories/:slug/products', productController.getProductsByCategory);
+
+
 
 
 
@@ -25,10 +30,13 @@ router.get('/categories', categoryController.getAllCategories);
 router.get('/categories/:slug', categoryController.getCategoryBySlug);
 
 
+
 // Promotion routes
 router.get('/promotions', promotionController.getActivePromotions);
 
 module.exports = router;
+
+
 
 
 // Order routes

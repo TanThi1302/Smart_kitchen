@@ -1,6 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 export default {
 <<<<<<< HEAD
+<<<<<<< HEAD
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
@@ -20,6 +21,9 @@ export default {
   plugins: [],
 }
 =======
+=======
+
+>>>>>>> 675b4aab2c42009b23c0b163ad6af8de73116818
   darkMode: ["class"],
   content: [
     './pages/**/*.{js,jsx}',
@@ -110,4 +114,8 @@ export default {
   },
   plugins: [require("tailwindcss-animate")],
 }
+<<<<<<< HEAD
 >>>>>>> product-admin
+=======
+
+>>>>>>> 675b4aab2c42009b23c0b163ad6af8de73116818

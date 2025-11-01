@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 const pool = require('../config/database');
 
 // Lấy tất cả danh mục
@@ -9,6 +10,9 @@ const getAllCategories = async (req, res) => {
         c.*,
         COUNT(p.id) as product_count
 =======
+=======
+
+>>>>>>> 675b4aab2c42009b23c0b163ad6af8de73116818
 const db = require('../config/database');
 
 // Get all categories
@@ -17,11 +21,15 @@ exports.getAllCategories = async (req, res) => {
     const query = `
       SELECT c.*,
              COUNT(p.id) as product_count
+<<<<<<< HEAD
 >>>>>>> product-admin
+=======
+>>>>>>> 675b4aab2c42009b23c0b163ad6af8de73116818
       FROM categories c
       LEFT JOIN products p ON c.id = p.category_id AND p.is_active = true
       GROUP BY c.id
       ORDER BY c.name
+<<<<<<< HEAD
 <<<<<<< HEAD
     `);
     res.json(result.rows);
@@ -61,6 +69,9 @@ module.exports = {
   getCategoryBySlug
 };
 =======
+=======
+
+>>>>>>> 675b4aab2c42009b23c0b163ad6af8de73116818
     `;
     const result = await db.query(query);
 
@@ -154,4 +165,8 @@ exports.deleteCategory = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
+<<<<<<< HEAD
 >>>>>>> product-admin
+=======
+
+>>>>>>> 675b4aab2c42009b23c0b163ad6af8de73116818
