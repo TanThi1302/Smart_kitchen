@@ -1,31 +1,46 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 const api = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Products API
-export const productAPI = {
-  getAll: () => api.get('/products'),
-  getFeatured: () => api.get('/products/featured'),
-  getBySlug: (slug) => api.get(`/products/${slug}`),
-  getByCategory: (categorySlug) => api.get(`/categories/${categorySlug}/products`),
-};
+// Products
+export const getProducts = (params) => api.get('/products', { params });
+export const getFeaturedProducts = () => api.get('/products/featured');
+export const getProductBySlug = (slug) => api.get(`/products/${slug}`);
 
-// Categories API
-export const categoryAPI = {
-  getAll: () => api.get('/categories'),
-  getBySlug: (slug) => api.get(`/categories/${slug}`),
-};
+// Categories
+export const getCategories = () => api.get('/categories');
+export const getCategoryBySlug = (slug) => api.get(`/categories/${slug}`);
 
-// Promotions API
-export const promotionAPI = {
-  getActive: () => api.get('/promotions'),
-};
+// Orders
+export const createOrder = (data) => api.post('/orders', data);
+export const getOrderById = (id) => api.get(`/orders/${id}`);
+
+// Posts
+export const getPosts = (params) => api.get('/posts', { params });
+export const getPostBySlug = (slug) => api.get(`/posts/${slug}`);
+
+// Other
+export const getPromotions = () => api.get('/promotions');
+export const getJobPostings = () => api.get('/jobs');
+export const submitContactMessage = (data) => api.post('/contact', data);
+
+// Admin APIs
+export const adminCreateProduct = (data) => api.post('/admin/products', data);
+export const adminUpdateProduct = (id, data) => api.put(`/admin/products/${id}`, data);
+export const adminDeleteProduct = (id) => api.delete(`/admin/products/${id}`);
+export const adminGetOrders = (params) => api.get('/admin/orders', { params });
+export const adminUpdateOrderStatus = (id, status) => api.put(`/admin/orders/${id}/status`, { status });
+export const adminGetPosts = (params) => api.get('/admin/posts', { params });
+export const adminCreatePost = (data) => api.post('/admin/posts', data);
+export const adminUpdatePost = (id, data) => api.put(`/admin/posts/${id}`, data);
+export const adminDeletePost = (id) => api.delete(`/admin/posts/${id}`);
+export const adminGetContactMessages = (params) => api.get('/admin/contact-messages', { params });
 
 export default api;
