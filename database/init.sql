@@ -146,21 +146,52 @@ INSERT INTO categories (name, slug, description) VALUES
 ('Lò nướng', 'lo-nuong', 'Lò nướng đa năng, nướng bánh chuyên nghiệp'),
 ('Máy rửa bát', 'may-rua-bat', 'Máy rửa bát tự động, tiện lợi');
 
--- Insert sample products
+-- Insert sample products (20 sản phẩm)
 INSERT INTO products (name, slug, description, price, sale_price, stock, category_id, brand, is_featured) VALUES
 ('Bếp từ đôi Malloca MH-03IB', 'bep-tu-doi-malloca-mh-03ib', 'Bếp từ đôi công nghệ Đức, tiết kiệm điện 40%', 8500000, 7650000, 50, 1, 'Malloca', true),
 ('Bếp từ đơn Malloca MH-01I', 'bep-tu-don-malloca-mh-01i', 'Bếp từ đơn nhỏ gọn, phù hợp gia đình nhỏ', 4200000, 3780000, 80, 1, 'Malloca', false),
 ('Máy hút mùi Malloca MC-90IH', 'may-hut-mui-malloca-mc-90ih', 'Máy hút mùi áp tường công suất 900m3/h', 6800000, NULL, 35, 2, 'Malloca', true),
 ('Chậu rửa đôi Malloca MS-6402', 'chau-rua-doi-malloca-ms-6402', 'Chậu rửa inox 304 cao cấp 2 hộc', 3500000, 3150000, 60, 3, 'Malloca', false),
-('Lò nướng âm Malloca MOV-60ES', 'lo-nuong-am-malloca-mov-60es', 'Lò nướng âm tủ 60L, 10 chức năng nướng', 12000000, NULL, 25, 4, 'Malloca', true);
+('Lò nướng âm Malloca MOV-60ES', 'lo-nuong-am-malloca-mov-60es', 'Lò nướng âm tủ 60L, 10 chức năng nướng', 12000000, NULL, 25, 4, 'Malloca', true),
+('Bếp từ Bosch PIF-875N34E', 'bep-tu-bosch-pif-875n34e', 'Bếp từ Bosch series 8, cảm ứng và hẹn giờ thông minh', 14990000, 13500000, 30, 1, 'Bosch', true),
+('Máy hút mùi Bosch DWB97JM60', 'may-hut-mui-bosch-dwb97jm60', 'Máy hút mùi kính cong, công suất 770m3/h', 12990000, 11900000, 20, 2, 'Bosch', true),
+('Chậu rửa Blanco Metra 6 S-IF', 'chau-rua-blanco-metra-6-s-if', 'Chậu rửa Blanco đá nhân tạo, 2 hộc, kèm phụ kiện', 8990000, 8200000, 40, 3, 'Blanco', false),
+('Lò nướng Bosch HBG634BB1B', 'lo-nuong-bosch-hbg634bb1b', 'Lò nướng Bosch 71L, 3D Hotair, màn hình TFT', 16890000, 15800000, 15, 4, 'Bosch', true),
+('Bếp từ Teka IZ-7200FSC', 'bep-tu-teka-iz-7200fsc', 'Bếp từ Teka Tây Ban Nha, 4 vùng nấu, Bridge zone', 10900000, 9500000, 45, 1, 'Teka', false),
+('Máy hút mùi Teka DHC-90-90', 'may-hut-mui-teka-dhc-90-90', 'Máy hút mùi đảo Teka, kính cong, công suất lớn', 12900000, NULL, 18, 2, 'Teka', false),
+('Chậu rửa Teka BE-F 45.1', 'chau-rua-teka-be-f-45.1', 'Chậu rửa Teka inox cao cấp 1 hộc, bộ xả và phụ kiện kèm', 5990000, 5400000, 55, 3, 'Teka', false),
+('Lò nướng Teka HLB 8400', 'lo-nuong-teka-hlb-8400', 'Lò nướng Teka 70L, nhiều chế độ nướng và vệ sinh pyrolytic', 14400000, 13000000, 22, 4, 'Teka', false),
+('Bếp từ Hafele HC-I772B', 'bep-tu-hafele-hc-i772b', 'Bếp từ Hafele 2 vùng, công nghệ IQ-touch, thiết kế âm bàn', 12500000, 11000000, 28, 1, 'Hafele', false),
+('Máy hút mùi Hafele H-N90D', 'may-hut-mui-hafele-h-n90d', 'Máy hút mùi âm tủ Hafele, LED và bộ lọc than hoạt tính', 9500000, 8800000, 35, 2, 'Hafele', false),
+('Chậu rửa Hafele Zen-N45A', 'chau-rua-hafele-zen-n45a', 'Chậu rửa Hafele đá nhân tạo, kích thước 450mm', 6490000, 5900000, 50, 3, 'Hafele', false),
+('Lò nướng Hafele HO-E60D', 'lo-nuong-hafele-ho-e60d', 'Lò nướng Hafele 60L, đa chức năng, kèm khay nướng mềm', 13500000, NULL, 12, 4, 'Hafele', false),
+('Bếp điện từ Eurosun EU-TT650G', 'bep-dien-tu-eurosun-eu-tt650g', 'Bếp điện từ Eurosun 3 vùng nấu, mặt kính Schott', 7900000, 7250000, 38, 1, 'Eurosun', false),
+('Máy hút mùi Eurosun EH-T2169B', 'may-hut-mui-eurosun-eh-t2169b', 'Máy hút mùi Eurosun kính thẳng, công suất 900m3/h', 6200000, 5700000, 60, 2, 'Eurosun', false),
+('Chậu rửa Konox KN8540B', 'chau-rua-konox-kn8540b', 'Chậu rửa Konox inox 304, đáy chịu nhiệt cao', 4490000, 3990000, 70, 3, 'Konox', false);
 
--- Insert sample product images
+-- Insert sample product images for those 20 products
 INSERT INTO product_images (product_id, image_url, is_primary, display_order) VALUES
-(1, 'https://placehold.co/600x600/0066CC/FFFFFF/png?text=Bep+Tu+Doi', true, 0),
-(2, 'https://placehold.co/600x600/0066CC/FFFFFF/png?text=Bep+Tu+Don', true, 0),
-(3, 'https://placehold.co/600x600/0066CC/FFFFFF/png?text=May+Hut+Mui', true, 0),
-(4, 'https://placehold.co/600x600/0066CC/FFFFFF/png?text=Chau+Rua', true, 0),
-(5, 'https://placehold.co/600x600/0066CC/FFFFFF/png?text=Lo+Nuong', true, 0);
+(1, 'https://placehold.co/600x600/FF7F00/FFFFFF/png?text=Bếp+Từ+Đôi+Malloca+MH-03IB', true, 0),
+(2, 'https://placehold.co/600x600/FF7F00/FFFFFF/png?text=Bếp+Từ+Đơn+Malloca+MH-01I', true, 0),
+(3, 'https://placehold.co/600x600/FF7F00/FFFFFF/png?text=Máy+Hút+Mùi+Malloca+MC-90IH', true, 0),
+(4, 'https://placehold.co/600x600/FF7F00/FFFFFF/png?text=Chậu+Rửa+Đôi+Malloca+MS-6402', true, 0),
+(5, 'https://placehold.co/600x600/FF7F00/FFFFFF/png?text=Lò+Nướng+Âm+Malloca+MOV-60ES', true, 0),
+(6, 'https://placehold.co/600x600/007700/FFFFFF/png?text=Bếp+Từ+Bosch+PIF-875N34E', true, 0),
+(7, 'https://placehold.co/600x600/007700/FFFFFF/png?text=Máy+Hút+Mùi+Bosch+DWB97JM60', true, 0),
+(8, 'https://placehold.co/600x600/007700/FFFFFF/png?text=Chậu+Rửa+Blanco+Metra+6+S-IF', true, 0),
+(9, 'https://placehold.co/600x600/007700/FFFFFF/png?text=Lò+Nướng+Bosch+HBG634BB1B', true, 0),
+(10, 'https://placehold.co/600x600/003366/FFFFFF/png?text=Bếp+Từ+Teka+IZ-7200FSC', true, 0),
+(11, 'https://placehold.co/600x600/003366/FFFFFF/png?text=Máy+Hút+Mùi+Teka+DHC-90-90', true, 0),
+(12, 'https://placehold.co/600x600/003366/FFFFFF/png?text=Chậu+Rửa+Teka+BE-F+45.1', true, 0),
+(13, 'https://placehold.co/600x600/003366/FFFFFF/png?text=Lò+Nướng+Teka+HLB+8400', true, 0),
+(14, 'https://placehold.co/600x600/990000/FFFFFF/png?text=Bếp+Từ+Hafele+HC-I772B', true, 0),
+(15, 'https://placehold.co/600x600/990000/FFFFFF/png?text=Máy+Hút+Mùi+Hafele+H-N90D', true, 0),
+(16, 'https://placehold.co/600x600/990000/FFFFFF/png?text=Chậu+Rửa+Hafele+Zen-N45A', true, 0),
+(17, 'https://placehold.co/600x600/990000/FFFFFF/png?text=Lò+Nướng+Hafele+HO-E60D', true, 0),
+(18, 'https://placehold.co/600x600/CC0000/FFFFFF/png?text=Bếp+Điện+Từ+Eurosun+EU-TT650G', true, 0),
+(19, 'https://placehold.co/600x600/CC0000/FFFFFF/png?text=Máy+Hút+Mùi+Eurosun+EH-T2169B', true, 0),
+(20, 'https://placehold.co/600x600/CC0000/FFFFFF/png?text=Chậu+Rửa+Konox+KN8540B', true, 0);
+
 
 -- Insert sample promotions
 INSERT INTO promotions (title, description, discount_percent, start_date, end_date, is_active) VALUES
@@ -168,9 +199,54 @@ INSERT INTO promotions (title, description, discount_percent, start_date, end_da
 ('Flash Sale Cuối Tuần', 'Giảm 25% các sản phẩm bếp từ', 25.00, NOW(), NOW() + INTERVAL '7 days', true);
 
 -- Insert sample posts
-INSERT INTO posts (title, slug, content, excerpt, category, author, is_published, published_at) VALUES
-('Cách chọn bếp từ phù hợp cho gia đình', 'cach-chon-bep-tu-phu-hop', 'Nội dung chi tiết về cách chọn bếp từ...', 'Hướng dẫn chi tiết giúp bạn chọn bếp từ phù hợp', 'Hướng dẫn', 'Admin', true, NOW()),
-('Top 5 máy hút mùi bán chạy 2025', 'top-5-may-hut-mui-ban-chay-2025', 'Danh sách 5 máy hút mùi được yêu thích nhất...', 'Tổng hợp những máy hút mùi được khách hàng tin dùng', 'Tin tức', 'Admin', true, NOW());
+INSERT INTO posts 
+(title, slug, content, excerpt, thumbnail_url, category, author, is_published, published_at)
+VALUES
+(
+  'Bếp từ thông minh – Giải pháp hiện đại cho căn bếp Việt',
+  'bep-tu-thong-minh',
+  'Bếp từ ngày càng trở thành lựa chọn phổ biến trong các gia đình hiện đại nhờ tính an toàn, hiệu suất cao và thiết kế sang trọng. Trong bài viết này, chúng ta sẽ cùng tìm hiểu về những ưu điểm nổi bật của bếp từ và cách chọn lựa sản phẩm phù hợp cho căn bếp của bạn.',
+  'Bếp từ ngày càng được ưa chuộng nhờ hiệu suất cao và độ an toàn tuyệt đối.',
+  'https://placehold.co/600x600/0066CC/FFFFFF/png?text=Bep+Tu+Doi',
+  'Bếp từ',
+  'Admin',
+  true,
+  NOW()
+),
+(
+  'Máy hút mùi – Giữ cho không gian bếp luôn trong lành',
+  'may-hut-mui-hien-dai',
+  'Máy hút mùi giúp loại bỏ khói, dầu mỡ và mùi thức ăn, mang lại không gian bếp thoáng đãng và dễ chịu. Hãy cùng khám phá những mẫu máy hút mùi hiện đại, tiết kiệm điện và phù hợp với nhiều loại không gian khác nhau.',
+  'Giữ không gian bếp trong lành với máy hút mùi công nghệ cao.',
+  'https://placehold.co/600x600/0066CC/FFFFFF/png?text=Bep+Tu+Doi',
+  'Máy hút mùi',
+  'Admin',
+  true,
+  NOW()
+),
+
+(
+  'Chậu rửa inox cao cấp – Sự lựa chọn hoàn hảo cho căn bếp hiện đại',
+  'chau-rua-inox-cao-cap',
+  'Chậu rửa inox không chỉ bền bỉ mà còn mang lại vẻ sang trọng và tiện dụng. Bài viết này sẽ giúp bạn tìm hiểu về các loại chậu rửa phổ biến, cách chọn kích thước phù hợp và mẹo bảo quản chậu rửa luôn sáng bóng.',
+  'Tìm hiểu cách chọn chậu rửa inox phù hợp cho căn bếp của bạn.',
+  'https://placehold.co/600x600/0066CC/FFFFFF/png?text=Bep+Tu+Doi',
+  'Chậu rửa',
+  'Admin',
+  true,
+  NOW()
+),
+(
+  'Lò nướng đa năng – Bí quyết cho món ăn chuẩn vị nhà hàng',
+  'lo-nuong-da-nang',
+  'Lò nướng là thiết bị không thể thiếu cho những ai yêu thích nấu nướng. Từ nướng bánh, thịt đến hải sản – tất cả đều trở nên dễ dàng và thơm ngon hơn với lò nướng hiện đại. Cùng khám phá các tính năng mới nhất giúp bạn tối ưu trải nghiệm nấu ăn.',
+  'Khám phá các mẫu lò nướng đa năng, tiện ích cho mọi gia đình.',
+  'https://placehold.co/600x600/0066CC/FFFFFF/png?text=Bep+Tu+Doi',
+  'Lò nướng',
+  'Admin',
+  true,
+  NOW()
+);
 
 -- Insert sample admin user (password: admin123)
 INSERT INTO users (email, password_hash, full_name, role) VALUES

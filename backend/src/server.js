@@ -2,6 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 require('dotenv').config();
+console.log('🔍 DB env check:', process.env.DB_HOST, process.env.DB_NAME, process.env.DB_USER);
+
 
 const routes = require('./routes');
 

@@ -20,55 +20,54 @@ export default function PostDetail() {
 
   const post = data?.data
 
-  if (isLoading) {
+  if (isLoading)
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto animate-pulse">
-          <div className="bg-gray-200 h-8 rounded w-3/4 mb-4"></div>
-          <div className="bg-gray-200 h-64 rounded mb-6"></div>
-          <div className="space-y-3">
-            <div className="bg-gray-200 h-4 rounded"></div>
-            <div className="bg-gray-200 h-4 rounded"></div>
-            <div className="bg-gray-200 h-4 rounded w-5/6"></div>
-          </div>
+      <div className="container mx-auto px-4 py-8 animate-pulse">
+        <div className="bg-gray-200 h-8 rounded w-3/4 mb-4"></div>
+        <div className="bg-gray-200 h-64 rounded mb-6"></div>
+        <div className="space-y-3">
+          <div className="bg-gray-200 h-4 rounded"></div>
+          <div className="bg-gray-200 h-4 rounded"></div>
         </div>
       </div>
     )
-  }
 
-  if (!post) {
+  if (!post)
     return (
-      <div className="container mx-auto px-4 py-8 text-center">
-        <h2 className="text-2xl font-bold mb-4">Không tìm thấy bài viết</h2>
+      <div className="container mx-auto px-4 py-12 text-center">
+        <h2 className="text-2xl font-bold mb-4 text-gray-700">
+          Không tìm thấy bài viết
+        </h2>
         <Link to="/posts">
           <Button>
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Quay lại
+            <ArrowLeft className="mr-2 h-4 w-4" /> Quay lại
           </Button>
         </Link>
       </div>
     )
-  }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-4xl mx-auto">
+    <div className="bg-gray-50 min-h-screen">
+      <div className="relative w-full h-[300px] bg-cover bg-center" style={{
+        backgroundImage: `url('${post.thumbnail_url || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1600&q=80'}')`
+      }}>
+        <div className="absolute inset-0 bg-black/50 flex flex-col justify-center items-center text-white text-center">
+          <h1 className="text-4xl font-bold mb-2 max-w-3xl">{post.title}</h1>
+          {post.category && <Badge>{post.category}</Badge>}
+        </div>
+      </div>
+
+      <div className="container mx-auto px-4 py-12 max-w-4xl">
         <Link to="/posts">
-          <Button variant="ghost" className="mb-6">
+          <Button variant="outline" className="mb-6">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Quay lại tin tức
           </Button>
         </Link>
 
-        <Card>
+        <Card className="shadow-md border-none">
           <CardContent className="p-8">
-            {post.category && (
-              <Badge className="mb-4">{post.category}</Badge>
-            )}
-
-            <h1 className="text-4xl font-bold mb-4">{post.title}</h1>
-
-            <div className="flex items-center gap-6 text-gray-600 mb-6">
+            <div className="flex items-center gap-6 text-gray-600 mb-6 text-sm">
               {post.author && (
                 <span className="flex items-center gap-2">
                   <User className="h-4 w-4" />
@@ -81,14 +80,6 @@ export default function PostDetail() {
               </span>
             </div>
 
-            {post.thumbnail_url && (
-              <img
-                src={post.thumbnail_url}
-                alt={post.title}
-                className="w-full h-auto rounded-lg mb-6"
-              />
-            )}
-
             {post.excerpt && (
               <p className="text-xl text-gray-700 font-medium mb-6">
                 {post.excerpt}
@@ -96,7 +87,7 @@ export default function PostDetail() {
             )}
 
             <div
-              className="prose prose-lg max-w-none"
+              className="prose prose-lg max-w-none text-gray-800 leading-relaxed"
               dangerouslySetInnerHTML={{ __html: post.content || '' }}
             />
           </CardContent>
