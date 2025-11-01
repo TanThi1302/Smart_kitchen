@@ -7,7 +7,6 @@ exports.getAllCategories = async (req, res) => {
     const query = `
       SELECT c.*,
              COUNT(p.id) as product_count
->>>>>>> product-admin
       FROM categories c
       LEFT JOIN products p ON c.id = p.category_id AND p.is_active = true
       GROUP BY c.id
