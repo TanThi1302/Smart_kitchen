@@ -1,29 +1,5 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-<<<<<<< HEAD
-<<<<<<< HEAD
-  content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
-  ],
-  theme: {
-    extend: {
-      colors: {
-        primary: '#0066CC',
-        secondary: '#FF6B00',
-        dark: '#1a1a1a',
-      },
-      fontFamily: {
-        sans: ['Inter', 'sans-serif'],
-      },
-    },
-  },
-  plugins: [],
-}
-=======
-=======
-
->>>>>>> 675b4aab2c42009b23c0b163ad6af8de73116818
   darkMode: ["class"],
   content: [
     './pages/**/*.{js,jsx}',
@@ -114,8 +90,3 @@ export default {
   },
   plugins: [require("tailwindcss-animate")],
 }
-<<<<<<< HEAD
->>>>>>> product-admin
-=======
-
->>>>>>> 675b4aab2c42009b23c0b163ad6af8de73116818

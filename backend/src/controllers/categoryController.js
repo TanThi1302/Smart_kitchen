@@ -1,18 +1,3 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
-const pool = require('../config/database');
-
-// Lấy tất cả danh mục
-const getAllCategories = async (req, res) => {
-  try {
-    const result = await pool.query(`
-      SELECT 
-        c.*,
-        COUNT(p.id) as product_count
-=======
-=======
-
->>>>>>> 675b4aab2c42009b23c0b163ad6af8de73116818
 const db = require('../config/database');
 
 // Get all categories
@@ -21,57 +6,10 @@ exports.getAllCategories = async (req, res) => {
     const query = `
       SELECT c.*,
              COUNT(p.id) as product_count
-<<<<<<< HEAD
->>>>>>> product-admin
-=======
->>>>>>> 675b4aab2c42009b23c0b163ad6af8de73116818
       FROM categories c
       LEFT JOIN products p ON c.id = p.category_id AND p.is_active = true
       GROUP BY c.id
       ORDER BY c.name
-<<<<<<< HEAD
-<<<<<<< HEAD
-    `);
-    res.json(result.rows);
-  } catch (error) {
-    console.error('Error fetching categories:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-};
-
-// Lấy danh mục theo slug
-const getCategoryBySlug = async (req, res) => {
-  try {
-    const { slug } = req.params;
-    const result = await pool.query(`
-      SELECT 
-        c.*,
-        COUNT(p.id) as product_count
-      FROM categories c
-      LEFT JOIN products p ON c.id = p.category_id AND p.is_active = true
-      WHERE c.slug = $1
-      GROUP BY c.id
-    `, [slug]);
-
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Category not found' });
-    }
-
-    res.json(result.rows[0]);
-  } catch (error) {
-    console.error('Error fetching category:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-};
-
-module.exports = {
-  getAllCategories,
-  getCategoryBySlug
-};
-=======
-=======
-
->>>>>>> 675b4aab2c42009b23c0b163ad6af8de73116818
     `;
     const result = await db.query(query);
 
@@ -165,8 +103,3 @@ exports.deleteCategory = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
-<<<<<<< HEAD
->>>>>>> product-admin
-=======
-
->>>>>>> 675b4aab2c42009b23c0b163ad6af8de73116818

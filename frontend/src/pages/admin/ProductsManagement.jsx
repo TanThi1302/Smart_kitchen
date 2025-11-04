@@ -21,13 +21,17 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { formatPrice } from '@/lib/utils'
-import { Plus, Pencil, Trash2, Eye } from 'lucide-react'
+import { Plus, Pencil, Trash2, Eye, Upload, X } from 'lucide-react'
+import { useToast } from '@/hooks/use-toast'
 
 export default function ProductsManagement() {
   const queryClient = useQueryClient()
+  const { toast } = useToast()
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingProduct, setEditingProduct] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
+  const [selectedImages, setSelectedImages] = useState([])
+  const [imagePreviews, setImagePreviews] = useState([])
 
   const [formData, setFormData] = useState({
     name: '',
@@ -59,11 +63,22 @@ export default function ProductsManagement() {
   })
 
   const createMutation = useMutation({
-    mutationFn: adminCreateProduct,
+    mutationFn: ({ data, images }) => adminCreateProduct(data, images),
     onSuccess: () => {
       queryClient.invalidateQueries(['admin-products'])
       setIsDialogOpen(false)
       resetForm()
+      toast({
+        title: "Thành công",
+        description: "Sản phẩm đã được tạo thành công.",
+      })
+    },
+    onError: (error) => {
+      toast({
+        title: "Lỗi",
+        description: "Có lỗi xảy ra khi tạo sản phẩm.",
+        variant: "destructive",
+      })
     },
   })
 
@@ -73,6 +88,17 @@ export default function ProductsManagement() {
       queryClient.invalidateQueries(['admin-products'])
       setIsDialogOpen(false)
       resetForm()
+      toast({
+        title: "Thành công",
+        description: "Sản phẩm đã được cập nhật thành công.",
+      })
+    },
+    onError: (error) => {
+      toast({
+        title: "Lỗi",
+        description: "Có lỗi xảy ra khi cập nhật sản phẩm.",
+        variant: "destructive",
+      })
     },
   })
 
@@ -80,6 +106,17 @@ export default function ProductsManagement() {
     mutationFn: adminDeleteProduct,
     onSuccess: () => {
       queryClient.invalidateQueries(['admin-products'])
+      toast({
+        title: "Thành công",
+        description: "Sản phẩm đã được xóa thành công.",
+      })
+    },
+    onError: (error) => {
+      toast({
+        title: "Lỗi",
+        description: "Có lỗi xảy ra khi xóa sản phẩm.",
+        variant: "destructive",
+      })
     },
   })
 
@@ -99,6 +136,8 @@ export default function ProductsManagement() {
       is_featured: false,
       is_active: true,
     })
+    setSelectedImages([])
+    setImagePreviews([])
     setEditingProduct(null)
   }
 
@@ -123,6 +162,22 @@ export default function ProductsManagement() {
     setIsDialogOpen(true)
   }
 
+  const handleImageChange = (e) => {
+    const files = Array.from(e.target.files)
+    setSelectedImages(files)
+
+    // Create previews
+    const previews = files.map(file => URL.createObjectURL(file))
+    setImagePreviews(previews)
+  }
+
+  const removeImage = (index) => {
+    const newImages = selectedImages.filter((_, i) => i !== index)
+    const newPreviews = imagePreviews.filter((_, i) => i !== index)
+    setSelectedImages(newImages)
+    setImagePreviews(newPreviews)
+  }
+
   const handleSubmit = (e) => {
     e.preventDefault()
 
@@ -137,7 +192,7 @@ export default function ProductsManagement() {
     if (editingProduct) {
       updateMutation.mutate({ id: editingProduct.id, data })
     } else {
-      createMutation.mutate(data)
+      createMutation.mutate({ data, images: selectedImages })
     }
   }
 
@@ -367,7 +422,7 @@ export default function ProductsManagement() {
               <div>
                 <Label htmlFor="category_id">Danh mục *</Label>
                 <Select
-                  value={formData.category_id.toString()}
+                  value={formData.category_id}
                   onValueChange={(value) => setFormData({ ...formData, category_id: value })}
                 >
                   <SelectTrigger>
@@ -413,6 +468,57 @@ export default function ProductsManagement() {
                 />
                 <Label htmlFor="is_active">Hiển thị</Label>
               </div>
+
+              {/* Image Upload */}
+              {!editingProduct && (
+                <div className="col-span-2">
+                  <Label htmlFor="images">Hình ảnh sản phẩm</Label>
+                  <div className="mt-2">
+                    <input
+                      type="file"
+                      id="images"
+                      multiple
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      className="hidden"
+                    />
+                    <label
+                      htmlFor="images"
+                      className="flex items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition-colors"
+                    >
+                      <div className="text-center">
+                        <Upload className="mx-auto h-8 w-8 text-gray-400" />
+                        <p className="mt-2 text-sm text-gray-600">
+                          Nhấp để chọn hình ảnh hoặc kéo thả vào đây
+                        </p>
+                        <p className="text-xs text-gray-400">PNG, JPG, GIF tối đa 10MB</p>
+                      </div>
+                    </label>
+                  </div>
+
+                  {/* Image Previews */}
+                  {imagePreviews.length > 0 && (
+                    <div className="mt-4 grid grid-cols-4 gap-4">
+                      {imagePreviews.map((preview, index) => (
+                        <div key={index} className="relative">
+                          <img
+                            src={preview}
+                            alt={`Preview ${index + 1}`}
+                            className="w-full h-20 object-cover rounded-lg"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeImage(index)}
+                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             <DialogFooter>

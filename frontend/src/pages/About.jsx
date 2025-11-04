@@ -1,21 +1,3 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
-import React from 'react';
-
-const About = () => {
-  return (
-    <div>
-      <h1>Giới thiệu</h1>
-      <p>Đây là trang giới thiệu về công ty hoặc sản phẩm.</p>
-    </div>
-  );
-};
-
-export default About;
-=======
-=======
-
->>>>>>> 675b4aab2c42009b23c0b163ad6af8de73116818
 import { Card, CardContent } from '@/components/ui/card'
 import { Shield, Award, Users, Truck } from 'lucide-react'
 
@@ -150,8 +132,3 @@ export default function About() {
     </div>
   )
 }
-<<<<<<< HEAD
->>>>>>> product-admin
-=======
-
->>>>>>> 675b4aab2c42009b23c0b163ad6af8de73116818

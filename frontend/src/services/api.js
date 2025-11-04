@@ -1,52 +1,14 @@
 import axios from 'axios';
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-const API_BASE_URL = 'http://localhost:5000/api';
-
-const api = axios.create({
-  baseURL: API_BASE_URL,
-=======
-=======
->>>>>>> 675b4aab2c42009b23c0b163ad6af8de73116818
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 const api = axios.create({
   baseURL: API_URL,
-<<<<<<< HEAD
->>>>>>> product-admin
-=======
->>>>>>> 675b4aab2c42009b23c0b163ad6af8de73116818
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-// Products API
-export const productAPI = {
-  getAll: () => api.get('/products'),
-  getFeatured: () => api.get('/products/featured'),
-  getBySlug: (slug) => api.get(`/products/${slug}`),
-  getByCategory: (categorySlug) => api.get(`/categories/${categorySlug}/products`),
-};
-
-// Categories API
-export const categoryAPI = {
-  getAll: () => api.get('/categories'),
-  getBySlug: (slug) => api.get(`/categories/${slug}`),
-};
-
-// Promotions API
-export const promotionAPI = {
-  getActive: () => api.get('/promotions'),
-};
-
-export default api;
-=======
-=======
->>>>>>> 675b4aab2c42009b23c0b163ad6af8de73116818
 // Products
 export const getProducts = (params) => api.get('/products', { params });
 export const getFeaturedProducts = () => api.get('/products/featured');
@@ -76,7 +38,29 @@ export const adminUpdateProductImage = (imageId, data) => api.put(`/admin/produc
 export const adminDeleteProductImage = (imageId) => api.delete(`/admin/products/images/${imageId}`);
 
 // Admin APIs
-export const adminCreateProduct = (data) => api.post('/admin/products', data);
+export const adminCreateProduct = (data, images) => {
+  const formData = new FormData();
+
+  // Add form data
+  Object.keys(data).forEach(key => {
+    if (data[key] !== null && data[key] !== undefined) {
+      formData.append(key, data[key]);
+    }
+  });
+
+  // Add images
+  if (images && images.length > 0) {
+    images.forEach((image, index) => {
+      formData.append('images', image);
+    });
+  }
+
+  return api.post('/admin/products', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+};
 export const adminUpdateProduct = (id, data) => api.put(`/admin/products/${id}`, data);
 export const adminDeleteProduct = (id) => api.delete(`/admin/products/${id}`);
 export const adminGetOrders = (params) => api.get('/admin/orders', { params });
@@ -88,7 +72,3 @@ export const adminDeletePost = (id) => api.delete(`/admin/posts/${id}`);
 export const adminGetContactMessages = (params) => api.get('/admin/contact-messages', { params });
 
 export default api;
-<<<<<<< HEAD
->>>>>>> product-admin
-=======
->>>>>>> 675b4aab2c42009b23c0b163ad6af8de73116818

@@ -1,25 +1,68 @@
 import { useState, useEffect } from 'react'
-import { 
-  ShoppingCart, Search, Filter, ChefHat, Heart, 
+import {
+  ShoppingCart, Search, Filter, ChefHat, Heart,
   Star, Grid3x3, List, ChevronRight, X, Eye,
-  TrendingUp, Percent, Clock, DollarSign, ArrowUpDown
+  TrendingUp, Percent, Clock, DollarSign, ArrowUpDown, Plus, Pencil, Trash2
 } from 'lucide-react'
+import { getProducts, adminCreateProduct, adminUpdateProduct, adminDeleteProduct, getCategories } from '@/services/api'
+import { useToast } from '@/hooks/use-toast'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 
 export default function KitchenProductListing() {
+  const { toast } = useToast()
   const [searchTerm, setSearchTerm] = useState('')
   const [showSearchSuggestions, setShowSearchSuggestions] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState('')
   const [selectedBrands, setSelectedBrands] = useState([])
   const [priceRange, setPriceRange] = useState([0, 5000000])
   const [selectedRating, setSelectedRating] = useState(0)
-  const [sortBy, setSortBy] = useState('newest')
+  const [sortBy, setSortBy] = useState('created_at')
   const [viewMode, setViewMode] = useState('grid')
   const [favorites, setFavorites] = useState([])
   const [cart, setCart] = useState([])
   const [quickViewProduct, setQuickViewProduct] = useState(null)
   const [showFilters, setShowFilters] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
+  const [products, setProducts] = useState([])
+  const [categories, setCategories] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const [totalProducts, setTotalProducts] = useState(0)
+  const [totalPages, setTotalPages] = useState(0)
   const productsPerPage = 12
+
+  // Dialog states for CRUD operations
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [editingProduct, setEditingProduct] = useState(null)
+  const [formData, setFormData] = useState({
+    name: '',
+    slug: '',
+    description: '',
+    price: '',
+    sale_price: '',
+    stock: '',
+    category_id: '',
+    brand: '',
+    is_featured: false,
+    is_active: true,
+  })
 
   const searchSuggestions = [
     'Nồi áp suất',
@@ -29,210 +72,181 @@ export default function KitchenProductListing() {
     'Lò nướng điện'
   ]
 
-  const categories = [
-    { id: 1, name: 'Dụng cụ nấu nướng', slug: 'cooking', count: 145 },
-    { id: 2, name: 'Dao & thớt', slug: 'knives', count: 78 },
-    { id: 3, name: 'Dụng cụ nướng bánh', slug: 'baking', count: 92 },
-    { id: 4, name: 'Thiết bị điện', slug: 'electric', count: 63 },
-    { id: 5, name: 'Bộ đồ ăn', slug: 'dinnerware', count: 124 }
-  ]
+  // Fetch data on component mount
+  useEffect(() => {
+    fetchProducts()
+    fetchCategories()
+  }, [])
 
-  const brands = [
-    { id: 1, name: 'KitchenAid', count: 45 },
-    { id: 2, name: 'Tefal', count: 38 },
-    { id: 3, name: 'Sunhouse', count: 52 },
-    { id: 4, name: 'Lock&Lock', count: 41 },
-    { id: 5, name: 'Philips', count: 29 }
-  ]
+  // Fetch products with filters
+  useEffect(() => {
+    fetchProducts()
+  }, [currentPage, selectedCategory, searchTerm, sortBy])
 
-  const products = [
-    {
-      id: 1,
-      name: 'Bộ nồi inox 304 cao cấp 5 món',
-      price: 2500000,
-      salePrice: 1990000,
-      image: 'https://images.unsplash.com/photo-1593618998160-e34014e67546?w=500&h=500&fit=crop',
-      category: 'cooking',
-      brand: 'Sunhouse',
-      rating: 4.8,
-      reviews: 156,
-      tags: ['bestseller', 'sale'],
-      stock: 45
-    },
-    {
-      id: 2,
-      name: 'Bộ dao nhà bếp Nhật Bản 8 món kèm hộp gỗ',
-      price: 1800000,
-      salePrice: null,
-      image: 'https://images.unsplash.com/photo-1593618998160-e34014e67546?w=500&h=500&fit=crop',
-      category: 'knives',
-      brand: 'KitchenAid',
-      rating: 4.9,
-      reviews: 203,
-      tags: ['new'],
-      stock: 28
-    },
-    {
-      id: 3,
-      name: 'Máy xay sinh tố công suất cao 2000W',
-      price: 2200000,
-      salePrice: 1650000,
-      image: 'https://images.unsplash.com/photo-1570222094114-d054a817e56b?w=500&h=500&fit=crop',
-      category: 'electric',
-      brand: 'Philips',
-      rating: 4.7,
-      reviews: 189,
-      tags: ['sale', 'bestseller'],
-      stock: 15
-    },
-    {
-      id: 4,
-      name: 'Bộ thớt gỗ tre kháng khuẩn 3 size',
-      price: 450000,
-      salePrice: 350000,
-      image: 'https://images.unsplash.com/photo-1593618998160-e34014e67546?w=500&h=500&fit=crop',
-      category: 'knives',
-      brand: 'Lock&Lock',
-      rating: 4.6,
-      reviews: 92,
-      tags: ['sale'],
-      stock: 67
-    },
-    {
-      id: 5,
-      name: 'Khuôn nướng bánh silicon 12 ngăn chống dính',
-      price: 280000,
-      salePrice: 199000,
-      image: 'https://images.unsplash.com/photo-1593618998160-e34014e67546?w=500&h=500&fit=crop',
-      category: 'baking',
-      brand: 'Tefal',
-      rating: 4.5,
-      reviews: 78,
-      tags: ['sale'],
-      stock: 120
-    },
-    {
-      id: 6,
-      name: 'Chảo chống dính đáy từ cao cấp 28cm',
-      price: 890000,
-      salePrice: null,
-      image: 'https://images.unsplash.com/photo-1593618998160-e34014e67546?w=500&h=500&fit=crop',
-      category: 'cooking',
-      brand: 'Tefal',
-      rating: 4.8,
-      reviews: 167,
-      tags: ['new', 'featured'],
-      stock: 34
-    },
-    {
-      id: 7,
-      name: 'Bộ dụng cụ làm bánh 15 món chuyên nghiệp',
-      price: 850000,
-      salePrice: 680000,
-      image: 'https://images.unsplash.com/photo-1495147466023-ac5c588e2e94?w=500&h=500&fit=crop',
-      category: 'baking',
-      brand: 'KitchenAid',
-      rating: 4.9,
-      reviews: 134,
-      tags: ['bestseller', 'sale'],
-      stock: 42
-    },
-    {
-      id: 8,
-      name: 'Bộ hũ đựng gia vị thủy tinh 12 món',
-      price: 420000,
-      salePrice: null,
-      image: 'https://images.unsplash.com/photo-1593618998160-e34014e67546?w=500&h=500&fit=crop',
-      category: 'dinnerware',
-      brand: 'Lock&Lock',
-      rating: 4.7,
-      reviews: 98,
-      tags: ['new'],
-      stock: 88
-    },
-    {
-      id: 9,
-      name: 'Máy đánh trứng cầm tay 7 tốc độ',
-      price: 680000,
-      salePrice: 549000,
-      image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=500&h=500&fit=crop',
-      category: 'electric',
-      brand: 'Philips',
-      rating: 4.6,
-      reviews: 145,
-      tags: ['sale'],
-      stock: 52
-    },
-    {
-      id: 10,
-      name: 'Nồi cơm điện cao cấp 1.8L',
-      price: 1500000,
-      salePrice: 1199000,
-      image: 'https://images.unsplash.com/photo-1585515320310-259814833e62?w=500&h=500&fit=crop',
-      category: 'electric',
-      brand: 'Sunhouse',
-      rating: 4.8,
-      reviews: 276,
-      tags: ['bestseller', 'sale'],
-      stock: 23
-    },
-    {
-      id: 11,
-      name: 'Bộ nồi inox 7 lớp đáy liền',
-      price: 3200000,
-      salePrice: 2560000,
-      image: 'https://images.unsplash.com/photo-1556911261-6bd341186b2f?w=500&h=500&fit=crop',
-      category: 'cooking',
-      brand: 'Tefal',
-      rating: 4.9,
-      reviews: 189,
-      tags: ['featured', 'sale'],
-      stock: 18
-    },
-    {
-      id: 12,
-      name: 'Lò nướng điện 45L đa năng',
-      price: 2800000,
-      salePrice: null,
-      image: 'https://images.unsplash.com/photo-1588854337221-4cf9fa96059e?w=500&h=500&fit=crop',
-      category: 'electric',
-      brand: 'Philips',
-      rating: 4.7,
-      reviews: 156,
-      tags: ['new'],
-      stock: 12
+  const fetchProducts = async () => {
+    try {
+      setLoading(true)
+      const params = {
+        page: currentPage,
+        limit: productsPerPage,
+        category: selectedCategory,
+        search: searchTerm,
+        sort: sortBy,
+      }
+      const response = await getProducts(params)
+      const productsData = response.data.data || []
+      // Transform backend data to match frontend expectations
+      const transformedProducts = productsData.map(product => ({
+        ...product,
+        image: product.image_url || 'https://via.placeholder.com/400x400?text=No+Image',
+        salePrice: product.sale_price,
+        tags: product.is_featured ? ['featured'] : [],
+        rating: 4.5, // Default rating since backend doesn't have this
+        reviews: 0, // Default reviews count
+      }))
+      setProducts(transformedProducts)
+      setTotalProducts(response.data.total || 0)
+      setTotalPages(response.data.pagination?.totalPages || 0)
+    } catch (err) {
+      setError('Failed to fetch products')
+      toast({
+        title: 'Error',
+        description: 'Failed to load products',
+        variant: 'destructive',
+      })
+    } finally {
+      setLoading(false)
     }
-  ]
+  }
+
+  const fetchCategories = async () => {
+    try {
+      const response = await getCategories()
+      setCategories(Array.isArray(response.data) ? response.data : [])
+    } catch (err) {
+      console.error('Failed to fetch categories:', err)
+      setCategories([])
+    }
+  }
+
+  const handleCreateProduct = async () => {
+    try {
+      await adminCreateProduct(formData)
+      toast({
+        title: 'Success',
+        description: 'Product created successfully',
+      })
+      setIsDialogOpen(false)
+      resetForm()
+      fetchProducts()
+    } catch (err) {
+      toast({
+        title: 'Error',
+        description: 'Failed to create product',
+        variant: 'destructive',
+      })
+    }
+  }
+
+  const handleUpdateProduct = async () => {
+    try {
+      await adminUpdateProduct(editingProduct.id, formData)
+      toast({
+        title: 'Success',
+        description: 'Product updated successfully',
+      })
+      setIsDialogOpen(false)
+      setEditingProduct(null)
+      resetForm()
+      fetchProducts()
+    } catch (err) {
+      toast({
+        title: 'Error',
+        description: 'Failed to update product',
+        variant: 'destructive',
+      })
+    }
+  }
+
+  const handleDeleteProduct = async (productId) => {
+    if (!confirm('Are you sure you want to delete this product?')) return
+
+    try {
+      await adminDeleteProduct(productId)
+      toast({
+        title: 'Success',
+        description: 'Product deleted successfully',
+      })
+      fetchProducts()
+    } catch (err) {
+      toast({
+        title: 'Error',
+        description: 'Failed to delete product',
+        variant: 'destructive',
+      })
+    }
+  }
+
+  const resetForm = () => {
+    setFormData({
+      name: '',
+      slug: '',
+      description: '',
+      price: '',
+      sale_price: '',
+      stock: '',
+      category_id: '',
+      brand: '',
+      is_featured: false,
+      is_active: true,
+    })
+  }
+
+  const openCreateDialog = () => {
+    resetForm()
+    setEditingProduct(null)
+    setIsDialogOpen(true)
+  }
+
+  const openEditDialog = (product) => {
+    setFormData({
+      name: product.name,
+      slug: product.slug,
+      description: product.description || '',
+      price: product.price.toString(),
+      sale_price: product.sale_price?.toString() || '',
+      stock: product.stock.toString(),
+      category_id: product.category_id,
+      brand: product.brand,
+      is_featured: product.is_featured,
+      is_active: product.is_active,
+    })
+    setEditingProduct(product)
+    setIsDialogOpen(true)
+  }
 
   const filteredProducts = products.filter(product => {
-    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesCategory = !selectedCategory || product.category === selectedCategory
     const matchesBrands = selectedBrands.length === 0 || selectedBrands.includes(product.brand)
-    const matchesPrice = (product.salePrice || product.price) >= priceRange[0] && 
-                         (product.salePrice || product.price) <= priceRange[1]
+    const matchesPrice = (product.sale_price || product.price) >= priceRange[0] &&
+                         (product.sale_price || product.price) <= priceRange[1]
     const matchesRating = selectedRating === 0 || product.rating >= selectedRating
-    
-    return matchesSearch && matchesCategory && matchesBrands && matchesPrice && matchesRating
+
+    return matchesBrands && matchesPrice && matchesRating
   })
 
   const sortedProducts = [...filteredProducts].sort((a, b) => {
     switch(sortBy) {
       case 'price-asc':
-        return (a.salePrice || a.price) - (b.salePrice || b.price)
+        return (a.sale_price || a.price) - (b.sale_price || b.price)
       case 'price-desc':
-        return (b.salePrice || b.price) - (a.salePrice || a.price)
-      case 'bestseller':
-        return b.reviews - a.reviews
-      case 'discount':
-        const discountA = a.salePrice ? ((a.price - a.salePrice) / a.price) * 100 : 0
-        const discountB = b.salePrice ? ((b.price - b.salePrice) / b.price) * 100 : 0
-        return discountB - discountA
+        return (b.sale_price || b.price) - (a.sale_price || a.price)
+      case 'created_at':
+        return new Date(b.created_at) - new Date(a.created_at)
       default:
         return 0
     }
   })
 
-  const totalPages = Math.ceil(sortedProducts.length / productsPerPage)
   const displayedProducts = sortedProducts.slice(
     (currentPage - 1) * productsPerPage,
     currentPage * productsPerPage
@@ -244,6 +258,8 @@ export default function KitchenProductListing() {
       currency: 'VND'
     }).format(price)
   }
+
+
 
   const toggleFavorite = (productId) => {
     setFavorites(prev => 
@@ -269,50 +285,16 @@ export default function KitchenProductListing() {
     )
   }
 
+  // Extract unique brands from products
+  const brands = [...new Set(products.map(p => p.brand))].map(brand => ({
+    id: brand,
+    name: brand,
+    count: products.filter(p => p.brand === brand).length
+  }))
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-white to-blue-50">
-      {/* Header */}
-      {/* <header className="bg-white border-b-2 border-cyan-100 shadow-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="bg-gradient-to-br from-cyan-400 to-blue-500 p-3 rounded-xl shadow-lg">
-                <ChefHat className="h-8 w-8 text-white" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
-                  Kitchen Store
-                </h1>
-                <p className="text-sm text-gray-500">Thiết bị nhà bếp cao cấp</p>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-4">
-              <button 
-                onClick={() => alert(`Bạn có ${favorites.length} sản phẩm yêu thích`)}
-                className="relative text-gray-600 hover:text-cyan-600 transition-colors"
-              >
-                <Heart className="h-6 w-6" />
-                {favorites.length > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
-                    {favorites.length}
-                  </span>
-                )}
-              </button>
-              
-              <button className="relative bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-500 hover:to-blue-600 text-white px-4 py-2 rounded-full shadow-lg transition-all hover:scale-105 flex items-center gap-2">
-                <ShoppingCart className="h-5 w-5" />
-                <span className="font-semibold">Giỏ hàng</span>
-                {cart.length > 0 && (
-                  <span className="bg-white text-cyan-600 text-xs px-2 py-1 rounded-full font-bold">
-                    {cart.length}
-                  </span>
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      </header> */}
+      
 
       {/* Breadcrumb */}
       <div className="bg-white border-b border-cyan-100">
@@ -379,10 +361,7 @@ export default function KitchenProductListing() {
               onChange={(e) => setSortBy(e.target.value)}
               className="px-4 py-3 rounded-xl border-2 border-cyan-200 focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-200 bg-white cursor-pointer"
             >
-              <option value="newest">
-                <Clock className="inline h-4 w-4 mr-2" />
-                Mới nhất
-              </option>
+              <option value="newest">Mới nhất</option>
               <option value="price-asc">Giá tăng dần</option>
               <option value="price-desc">Giá giảm dần</option>
               <option value="bestseller">Bán chạy nhất</option>

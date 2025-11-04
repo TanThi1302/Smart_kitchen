@@ -1,51 +1,7 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-
-=======
->>>>>>> product-admin
-=======
-
->>>>>>> 675b4aab2c42009b23c0b163ad6af8de73116818
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  font-family: 'Inter', sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: #f1f1f1;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #888;
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #555;
-}
-=======
-=======
-
->>>>>>> 675b4aab2c42009b23c0b163ad6af8de73116818
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -111,8 +67,3 @@ body {
     @apply bg-background text-foreground;
   }
 }
-<<<<<<< HEAD
->>>>>>> product-admin
-=======
-
->>>>>>> 675b4aab2c42009b23c0b163ad6af8de73116818

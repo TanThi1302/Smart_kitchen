@@ -1,125 +1,3 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
-const pool = require('../config/database');
-
-// Lấy tất cả sản phẩm
-const getAllProducts = async (req, res) => {
-  try {
-    const result = await pool.query(`
-      SELECT 
-        p.*,
-        c.name as category_name,
-        c.slug as category_slug,
-        pi.image_url as primary_image
-      FROM products p
-      LEFT JOIN categories c ON p.category_id = c.id
-      LEFT JOIN product_images pi ON p.id = pi.product_id AND pi.is_primary = true
-      WHERE p.is_active = true
-      ORDER BY p.created_at DESC
-    `);
-    res.json(result.rows);
-  } catch (error) {
-    console.error('Error fetching products:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-};
-
-// Lấy sản phẩm nổi bật
-const getFeaturedProducts = async (req, res) => {
-  try {
-    const result = await pool.query(`
-      SELECT 
-        p.*,
-        c.name as category_name,
-        pi.image_url as primary_image
-      FROM products p
-      LEFT JOIN categories c ON p.category_id = c.id
-      LEFT JOIN product_images pi ON p.id = pi.product_id AND pi.is_primary = true
-      WHERE p.is_active = true AND p.is_featured = true
-      ORDER BY p.created_at DESC
-      LIMIT 8
-    `);
-    res.json(result.rows);
-  } catch (error) {
-    console.error('Error fetching featured products:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-};
-
-// Lấy sản phẩm theo slug
-const getProductBySlug = async (req, res) => {
-  try {
-    const { slug } = req.params;
-    
-    const productResult = await pool.query(`
-      SELECT 
-        p.*,
-        c.name as category_name,
-        c.slug as category_slug
-      FROM products p
-      LEFT JOIN categories c ON p.category_id = c.id
-      WHERE p.slug = $1 AND p.is_active = true
-    `, [slug]);
-
-    if (productResult.rows.length === 0) {
-      return res.status(404).json({ error: 'Product not found' });
-    }
-
-    const imagesResult = await pool.query(`
-      SELECT image_url, is_primary, display_order
-      FROM product_images
-      WHERE product_id = $1
-      ORDER BY display_order
-    `, [productResult.rows[0].id]);
-
-    const product = {
-      ...productResult.rows[0],
-      images: imagesResult.rows
-    };
-
-    res.json(product);
-  } catch (error) {
-    console.error('Error fetching product:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-};
-
-// Lấy sản phẩm theo danh mục
-const getProductsByCategory = async (req, res) => {
-  try {
-    const { slug } = req.params;
-    
-    const result = await pool.query(`
-      SELECT 
-        p.*,
-        c.name as category_name,
-        c.slug as category_slug,
-        pi.image_url as primary_image
-      FROM products p
-      LEFT JOIN categories c ON p.category_id = c.id
-      LEFT JOIN product_images pi ON p.id = pi.product_id AND pi.is_primary = true
-      WHERE c.slug = $1 AND p.is_active = true
-      ORDER BY p.created_at DESC
-    `, [slug]);
-
-    res.json(result.rows);
-  } catch (error) {
-    console.error('Error fetching products by category:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-};
-
-// QUAN TRỌNG: Phải có dòng này
-module.exports = {
-  getAllProducts,
-  getFeaturedProducts,
-  getProductBySlug,
-  getProductsByCategory
-};
-=======
-=======
-
->>>>>>> 675b4aab2c42009b23c0b163ad6af8de73116818
 const db = require('../config/database');
 
 // Get all products with pagination and filters
@@ -237,17 +115,69 @@ exports.getFeaturedProducts = async (req, res) => {
 // Admin: Create product
 exports.createProduct = async (req, res) => {
   try {
-    const { name, slug, description, price, sale_price, stock, category_id, brand, specifications, is_featured } = req.body;
+    const { name, slug, description, price, sale_price, stock, category_id, brand, specifications, is_featured, is_active } = req.body;
+    const files = req.files || [];
 
-    const query = `
-      INSERT INTO products (name, slug, description, price, sale_price, stock, category_id, brand, specifications, is_featured)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-      RETURNING *
-    `;
-    const values = [name, slug, description, price, sale_price || null, stock, category_id, brand, specifications, is_featured || false];
-    const result = await db.query(query, values);
+    // Start transaction
+    const client = await db.pool.connect();
+    try {
+      await client.query('BEGIN');
 
-    res.status(201).json({ success: true, data: result.rows[0] });
+      // Generate unique slug
+      let uniqueSlug = slug;
+      let counter = 1;
+      while (true) {
+        const slugCheckQuery = 'SELECT id FROM products WHERE slug = $1';
+        const slugCheckResult = await client.query(slugCheckQuery, [uniqueSlug]);
+        if (slugCheckResult.rows.length === 0) {
+          break; // Slug is unique
+        }
+        uniqueSlug = `${slug}-${counter}`;
+        counter++;
+      }
+
+      // Insert product
+      const productQuery = `
+        INSERT INTO products (name, slug, description, price, sale_price, stock, category_id, brand, specifications, is_featured, is_active)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+        RETURNING *
+      `;
+      const productValues = [name, uniqueSlug, description, price, sale_price || null, stock, category_id, brand, specifications, is_featured || false, is_active !== undefined ? is_active : true];
+      const productResult = await client.query(productQuery, productValues);
+      const product = productResult.rows[0];
+
+      // Insert product images
+      if (files && files.length > 0) {
+        const imageQueries = files.map((file, index) => {
+          const imageUrl = `/uploads/${file.filename}`;
+          return client.query(
+            'INSERT INTO product_images (product_id, image_url, is_primary, display_order) VALUES ($1, $2, $3, $4)',
+            [product.id, imageUrl, index === 0, index]
+          );
+        });
+        await Promise.all(imageQueries);
+      }
+
+      // Get product with images
+      const finalProductQuery = `
+        SELECT p.*,
+               COALESCE(json_agg(pi.image_url) FILTER (WHERE pi.image_url IS NOT NULL), '[]') as images
+        FROM products p
+        LEFT JOIN product_images pi ON p.id = pi.product_id
+        WHERE p.id = $1
+        GROUP BY p.id
+      `;
+      const finalResult = await client.query(finalProductQuery, [product.id]);
+
+      await client.query('COMMIT');
+
+      res.status(201).json({ success: true, data: finalResult.rows[0] });
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
   } catch (error) {
     console.error('Error creating product:', error);
     res.status(500).json({ success: false, message: 'Server error' });
@@ -301,8 +231,6 @@ exports.deleteProduct = async (req, res) => {
   }
 };
 
-<<<<<<< HEAD
-// Get product images
 exports.getProductImages = async (req, res) => {
   try {
     const { productId } = req.params;
@@ -396,6 +324,21 @@ exports.deleteProductImage = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
->>>>>>> product-admin
-=======
->>>>>>> 675b4aab2c42009b23c0b163ad6af8de73116818
+
+// Welcome endpoint with logging
+exports.welcome = async (req, res) => {
+  try {
+    // Log request metadata
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.path} - Welcome endpoint accessed`);
+
+    res.json({
+      success: true,
+      message: 'Welcome to the Smart Kitchen API!',
+      timestamp: new Date().toISOString(),
+      version: '1.0.0'
+    });
+  } catch (error) {
+    console.error('Error in welcome endpoint:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
