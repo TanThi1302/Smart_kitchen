@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
-import { Facebook, Youtube, Mail, Phone, MapPin } from 'lucide-react'
+import { Facebook, Youtube, Mail, Utensils, Phone, MapPin, ChefHat } from 'lucide-react'
+
 
 export default function Footer() {
   return (
@@ -94,7 +95,7 @@ export default function Footer() {
         <div className="border-t border-gray-700 mt-8 pt-8 text-center text-sm">
           <p>&copy; 2025 Kitchen Store. All rights reserved.</p>
         </div>
-      
+
     </footer>
   )
 }

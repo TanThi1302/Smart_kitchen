@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Promotion = () => {
+const Promotions = () => {
   return (
     <div>
       <h1>Chương trình khuyến mãi</h1>
@@ -9,4 +9,4 @@ const Promotion = () => {
   );
 };
 
-export default Promotion;
+export default Promotions;
