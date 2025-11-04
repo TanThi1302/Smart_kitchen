@@ -1,4 +1,3 @@
-
 const db = require('../config/database');
 
 // Get all categories
@@ -11,7 +10,6 @@ exports.getAllCategories = async (req, res) => {
       LEFT JOIN products p ON c.id = p.category_id AND p.is_active = true
       GROUP BY c.id
       ORDER BY c.name
-
     `;
     const result = await db.query(query);
 
@@ -105,4 +103,3 @@ exports.deleteCategory = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
-
