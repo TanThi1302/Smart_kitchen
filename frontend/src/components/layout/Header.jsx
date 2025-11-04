@@ -33,6 +33,9 @@ export default function Header() {
             <Link to="/posts" className="text-gray-700 hover:text-primary font-medium transition-colors">
               Tin tức
             </Link>
+            <Link to="/posts" className="text-gray-700 hover:text-primary font-medium transition-colors">
+             Khuyến mãi
+            </Link>
             <Link to="/about" className="text-gray-700 hover:text-primary font-medium transition-colors">
               Giới thiệu
             </Link>
