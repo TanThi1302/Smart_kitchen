@@ -92,7 +92,7 @@ export default function PostDetail() {
             {post.excerpt && (
               <p className="text-xl text-gray-700 font-medium mb-6">
                 {post.excerpt}
-              </p>
+</p>
             )}
 
             <div
