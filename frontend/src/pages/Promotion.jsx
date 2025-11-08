@@ -3,8 +3,8 @@ import { useQuery } from '@tanstack/react-query'
 import { ChevronRight } from 'lucide-react'
 import { SaleHero } from '../components/promotion/SaleHero'
 import { NewsletterForm } from '../components/promotion/NewsletterForm'
-import { PostsFilters } from '../components/promotion/PostsFilters'
-import { PostGrid } from '../components/promotion/PostGrid'
+import { PostsFilters } from '../components/promotion/PromoFilters'
+import { PostGrid } from '../components/promotion/PromoGrid'
 import { ProductGrid } from '../components/promotion/ProductGrid'
 import { PromoQuest } from '../components/promotion/PromoQuest'
 import { useCountdown } from '../components/promotion/useCountdown'
@@ -16,22 +16,19 @@ const categories = ['Khuyến mãi', 'Sản phẩm mới']
 
 const normalizeProduct = (product) => {
   const effectivePrice = product.sale_price ?? product.price
-  const discountPercent = product.sale_price
-    ? Math.round(((product.price - product.sale_price) / product.price) * 100)
-    : null
-
   return {
     id: product.id,
     name: product.name,
     description:
       product.description?.slice(0, 150) ||
       'Thiết bị nhà bếp cao cấp Smart Kitchen cùng công nghệ kiểm soát nhiệt thông minh.',
+    slug: product.slug,
     price: formatPrice(effectivePrice),
     oldPrice: product.sale_price ? formatPrice(product.price) : null,
     image:
       product.image_url ||
       `https://images.unsplash.com/photo-1556911220-bff31c812dba?w=1600&auto=format&fit=crop&sig=${product.id}`,
-    tag: discountPercent ? `Giảm ${discountPercent}%` : 'Sản phẩm mới',
+    tag: 'Sản phẩm mới',
   }
 }
 
