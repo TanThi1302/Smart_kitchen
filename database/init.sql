@@ -163,9 +163,11 @@ INSERT INTO product_images (product_id, image_url, is_primary, display_order) VA
 (5, 'https://placehold.co/600x600/0066CC/FFFFFF/png?text=Lo+Nuong', true, 0);
 
 -- Insert sample promotions
-INSERT INTO promotions (title, description, discount_percent, start_date, end_date, is_active) VALUES
-('Khuyến mãi Tết 2025', 'Giảm giá 10-20% toàn bộ sản phẩm', 15.00, NOW(), NOW() + INTERVAL '30 days', true),
-('Flash Sale Cuối Tuần', 'Giảm 25% các sản phẩm bếp từ', 25.00, NOW(), NOW() + INTERVAL '7 days', true);
+INSERT INTO promotions (title, description, discount_percent, discount_amount, start_date, end_date, is_active) VALUES
+('Khuyến mãi Tết 2025', 'Giảm giá 10-20% toàn bộ sản phẩm', 15.00, NULL, NOW(), NOW() + INTERVAL '30 days', true),
+('Flash Sale Cuối Tuần', 'Giảm 25% các sản phẩm bếp từ', 25.00, NULL, NOW(), NOW() + INTERVAL '7 days', true),
+('Ưu đãi khai trương showroom Đà Nẵng', 'Ưu đãi 20% phí thiết kế và combo thiết bị khi khai trương showroom mới', 20.00, NULL, NOW() + INTERVAL '5 days', NOW() + INTERVAL '25 days', true),
+('Voucher thiết bị gia đình', 'Tặng ngay 3.000.000đ khi hoàn tất bản vẽ bếp trong tháng này', NULL, 3000000, NOW(), NOW() + INTERVAL '40 days', true);
 
 -- Insert sample posts
 INSERT INTO posts (title, slug, content, excerpt, category, author, is_published, published_at) VALUES

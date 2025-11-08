@@ -7,3 +7,4 @@ build/
 .vscode/
 .idea/
 postgres_data/
+backend/.env

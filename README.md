@@ -1,23 +1,19 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
 # malloca_clone
+
 # test commit
 
-clone repo :        
+clone repo :  
 lenh cai cai pack thieu
 cd frontend
 npm i
 npm install react-router-dom axios
 
-
 cd frontend
 npm install pg dotenv
 npm install dotenv
 
-=======
-=======
+# =======
 
->>>>>>> 675b4aab2c42009b23c0b163ad6af8de73116818
 # Kitchen E-commerce Website - Malloca Clone
 
 Website thương mại điện tử bán thiết bị nhà bếp, xây dựng bằng React, Node.js, và PostgreSQL 16.
@@ -344,4 +340,4 @@ git clone https://github.com/TanThi1302/Smart_kitchen.git
 - Kiểm tra `backend/src/server.js` đã config CORS đúng origin
 - Frontend URL mặc định: `http://localhost:5173`
 - Backend CORS đã được config cho `http://localhost:5173`
->>>>>>> product-admin
+  > > > > > > > product-admin
