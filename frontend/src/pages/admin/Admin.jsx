@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Package, ShoppingCart, FileText, Mail } from 'lucide-react'
 import ProductsManagement from './ProductsManagement'
 import OrdersManagement from './OrdersManagement'
+import TestOrders from './TestOrders'
 import PostsManagement from './PostsManagement'
 
 function AdminDashboard() {
@@ -123,11 +124,14 @@ function AdminDashboard() {
 
 export default function Admin() {
   return (
-    <Routes>
-      <Route index element={<AdminDashboard />} />
-      <Route path="products" element={<ProductsManagement />} />
-      <Route path="orders" element={<OrdersManagement />} />
-      <Route path="posts" element={<PostsManagement />} />
-    </Routes>
+    <div>
+      <Routes>
+        <Route index element={<AdminDashboard />} />
+        <Route path="products" element={<ProductsManagement />} />
+        <Route path="orders" element={<OrdersManagement />} />
+        <Route path="test-orders" element={<TestOrders />} />
+        <Route path="posts" element={<PostsManagement />} />
+      </Routes>
+    </div>
   )
 }
