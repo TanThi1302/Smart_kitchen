@@ -1,13 +1,23 @@
-import { useState } from 'react'
-import { 
-  ShoppingCart, Heart, Share2, ChefHat, Star, Check, 
+import { useState, useEffect } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
+import {
+  ShoppingCart, Heart, Share2, ChefHat, Star, Check,
   Truck, RefreshCw, Shield, CreditCard, ChevronRight,
   Minus, Plus, MapPin, MessageCircle, Gift, Package,
   ZoomIn, Play, Award, ThumbsUp, Facebook, Twitter,
-  Instagram, Link as LinkIcon, X, ChevronLeft, Info
+  Instagram, Link as LinkIcon, X, ChevronLeft, Info, Loader2, AlertCircle
 } from 'lucide-react'
+import { getProductBySlug, getRelatedProducts } from '@/services/api'
+import { useToast } from '@/hooks/use-toast'
+import useCartStore from '@/store/cartStore'
 
 export default function ProductDetailPage() {
+  const { slug } = useParams()
+  const navigate = useNavigate()
+  const { toast } = useToast()
+  const addItem = useCartStore(state => state.addItem)
+
   const [selectedImage, setSelectedImage] = useState(0)
   const [quantity, setQuantity] = useState(1)
   const [selectedVariant, setSelectedVariant] = useState('2L')
@@ -16,32 +26,76 @@ export default function ProductDetailPage() {
   const [activeTab, setActiveTab] = useState('description')
   const [showZoom, setShowZoom] = useState(false)
   const [showShareModal, setShowShareModal] = useState(false)
-  const [cart, setCart] = useState([])
   const [showCartPopup, setShowCartPopup] = useState(false)
   const [rating, setRating] = useState(0)
   const [reviewText, setReviewText] = useState('')
 
-  const product = {
-    id: 1,
-    name: 'Nồi Áp Suất Đa Năng Cao Cấp SmartCook Pro',
-    sku: 'NSC-2024-PRO',
-    brand: 'KitchenAid',
-    price: 3500000,
-    salePrice: 2790000,
-    rating: 4.8,
-    reviews: 342,
-    stock: 45,
-    sold: 1250,
-    images: [
-      'https://images.unsplash.com/photo-1585515320310-259814833e62?w=800&h=800&fit=crop',
-      'https://images.unsplash.com/photo-1585515320310-259814833e62?w=800&h=800&fit=crop',
-      'https://images.unsplash.com/photo-1556911261-6bd341186b2f?w=800&h=800&fit=crop',
-      'https://images.unsplash.com/photo-1585515320310-259814833e62?w=800&h=800&fit=crop'
-    ],
-    variants: ['1.5L', '2L', '2.5L', '3L'],
-    colors: ['Đỏ', 'Bạc', 'Đen'],
-    tags: ['Bán chạy', 'Giảm giá sốc', 'Miễn phí vận chuyển']
+  // Fetch product data
+  const { data: productData, isLoading: productLoading, error: productError } = useQuery({
+    queryKey: ['product', slug],
+    queryFn: () => getProductBySlug(slug),
+    enabled: !!slug
+  })
+
+  // Fetch related products
+  const { data: relatedData, isLoading: relatedLoading } = useQuery({
+    queryKey: ['related-products', slug],
+    queryFn: () => getRelatedProducts(slug),
+    enabled: !!slug
+  })
+
+  const product = productData?.data?.data
+  const relatedProducts = relatedData?.data?.data || []
+
+  // Debug logs
+  console.log('Product data:', product)
+  console.log('Related products:', relatedProducts)
+
+  // Debug prices
+  console.log("Debug prices:", {
+    price: product?.price,
+    old_price: product?.old_price,
+    parsedPrice: Number(product?.price),
+    parsedOldPrice: Number(product?.old_price),
+    discount: ((Number(product?.old_price) - Number(product?.price)) / Number(product?.old_price)) * 100,
+  })
+
+  // Handle images - fallback to single image if images array doesn't exist
+  const images = product?.images || (product?.image ? [product.image] : [])
+  const placeholderImage = 'https://via.placeholder.com/500x500?text=No+Image'
+
+  // Get image URLs for display
+  const imageUrls = images.map(img => typeof img === 'string' ? img : img?.image_url).filter(Boolean)
+
+  // Safe price parsing and formatting
+  const parsePrice = (price) => {
+    if (!price) return null
+    const cleaned = typeof price === 'string' ? price.replace(/[,₫]/g, '') : price
+    const num = Number(cleaned)
+    return isNaN(num) ? null : num
   }
+
+  const safeFormatPrice = (price) => {
+    const parsed = parsePrice(price)
+    return parsed !== null ? formatPrice(parsed) : 'Đang cập nhật'
+  }
+
+  // Redirect if product not found
+  useEffect(() => {
+    if (productError) {
+      navigate('/products')
+      toast({
+        title: "Sản phẩm không tồn tại",
+        description: "Sản phẩm bạn tìm kiếm không có sẵn.",
+        variant: "destructive"
+      })
+    }
+  }, [productError, navigate, toast])
+
+  // Reset selected image when product changes
+  useEffect(() => {
+    setSelectedImage(0)
+  }, [product])
 
   const specifications = [
     { label: 'Dung tích', value: '2.0 Lít' },
@@ -59,37 +113,6 @@ export default function ProductDetailPage() {
     { icon: RefreshCw, title: 'Đổi trả 30 ngày', desc: 'Nếu có lỗi từ NSX' },
     { icon: Shield, title: 'Bảo hành 24 tháng', desc: 'Chính hãng toàn quốc' },
     { icon: CreditCard, title: 'Thanh toán linh hoạt', desc: 'COD, chuyển khoản, trả góp' }
-  ]
-
-  const relatedProducts = [
-    {
-      id: 2,
-      name: 'Bộ nồi inox 5 món',
-      price: 1990000,
-      image: 'https://images.unsplash.com/photo-1584990347449-39b223174921?w=300&h=300&fit=crop',
-      rating: 4.7
-    },
-    {
-      id: 3,
-      name: 'Chảo chống dính 28cm',
-      price: 890000,
-      image: 'https://images.unsplash.com/photo-1565117933268-0e7102cd4cee?w=300&h=300&fit=crop',
-      rating: 4.6
-    },
-    {
-      id: 4,
-      name: 'Máy xay sinh tố',
-      price: 1650000,
-      image: 'https://images.unsplash.com/photo-1570222094114-d054a817e56b?w=300&h=300&fit=crop',
-      rating: 4.8
-    },
-    {
-      id: 5,
-      name: 'Bộ dao 6 món',
-      price: 1200000,
-      image: 'https://images.unsplash.com/photo-1593618998160-e34014e67546?w=300&h=300&fit=crop',
-      rating: 4.9
-    }
   ]
 
   const customerReviews = [
@@ -132,23 +155,52 @@ export default function ProductDetailPage() {
     }).format(price)
   }
 
-  const discount = Math.round(((product.price - product.salePrice) / product.price) * 100)
+  const salePrice = parsePrice(product?.price)
+  const originalPrice = parsePrice(product?.old_price)
+  const discount = originalPrice && salePrice && originalPrice > salePrice ? Math.round(((originalPrice - salePrice) / originalPrice) * 100) : 0
 
   const handleAddToCart = () => {
+    if (!product) return
     const cartItem = {
       ...product,
       quantity,
       variant: selectedVariant,
       color: selectedColor
     }
-    setCart([...cart, cartItem])
+    addItem(cartItem)
     setShowCartPopup(true)
     setTimeout(() => setShowCartPopup(false), 3000)
+    toast({
+      title: "Đã thêm vào giỏ hàng",
+      description: `${product.name} đã được thêm vào giỏ hàng.`,
+    })
   }
 
   const handleBuyNow = () => {
     handleAddToCart()
-    alert('Chuyển đến trang thanh toán...')
+    navigate('/checkout')
+  }
+
+  if (productLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-white to-blue-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 animate-spin text-cyan-600 mx-auto mb-4" />
+          <p className="text-gray-600">Đang tải sản phẩm...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!product) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-white to-blue-50 flex items-center justify-center">
+        <div className="text-center">
+          <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+          <p className="text-gray-600">Không tìm thấy sản phẩm</p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -204,7 +256,7 @@ export default function ProductDetailPage() {
               {/* Main Image */}
               <div className="relative mb-4 bg-gray-50 rounded-2xl overflow-hidden group">
                 <img
-                  src={product.images[selectedImage]}
+                  src={imageUrls[selectedImage] || placeholderImage}
                   alt={product.name}
                   className="w-full h-[500px] object-contain cursor-zoom-in"
                   onClick={() => setShowZoom(true)}
@@ -220,7 +272,7 @@ export default function ProductDetailPage() {
 
                 {/* Tags */}
                 <div className="absolute top-4 left-4 flex flex-col gap-2">
-                  {product.tags.map((tag, i) => (
+                  {(product.tags || []).map((tag, i) => (
                     <span
                       key={i}
                       className="bg-gradient-to-r from-red-500 to-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg"
@@ -233,7 +285,7 @@ export default function ProductDetailPage() {
 
               {/* Thumbnails */}
               <div className="grid grid-cols-4 gap-3">
-                {product.images.map((img, i) => (
+                {images.map((img, i) => (
                   <button
                     key={i}
                     onClick={() => setSelectedImage(i)}
@@ -244,7 +296,7 @@ export default function ProductDetailPage() {
                     }`}
                   >
                     <img
-                      src={img}
+                      src={imageUrls[i] || placeholderImage}
                       alt={`View ${i + 1}`}
                       className="w-full h-24 object-cover"
                     />
@@ -252,11 +304,7 @@ export default function ProductDetailPage() {
                 ))}
               </div>
 
-              {/* Video Button */}
-              <button className="w-full mt-4 bg-gradient-to-r from-cyan-50 to-blue-50 border-2 border-cyan-200 rounded-xl py-3 flex items-center justify-center gap-2 text-cyan-700 font-semibold hover:from-cyan-100 hover:to-blue-100 transition-colors">
-                <Play className="h-5 w-5" />
-                Xem video sản phẩm
-              </button>
+     
             </div>
 
             {/* Right: Product Info */}
@@ -304,25 +352,25 @@ export default function ProductDetailPage() {
               <div className="bg-gradient-to-r from-cyan-50 to-blue-50 rounded-2xl p-6 mb-6">
                 <div className="flex items-center gap-4 mb-2">
                   <p className="text-4xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
-                    {formatPrice(product.salePrice)}
+                    {safeFormatPrice(product.price)}
                   </p>
                   <span className="bg-red-500 text-white text-lg font-bold px-3 py-1 rounded-full">
                     -{discount}%
                   </span>
                 </div>
                 <p className="text-lg text-gray-500 line-through">
-                  {formatPrice(product.price)}
+                  {safeFormatPrice(product.old_price)}
                 </p>
               </div>
 
               {/* Variants */}
-              <div className="mb-6">
+              {/* <div className="mb-6">
                 <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
                   <Package className="h-5 w-5 text-cyan-600" />
                   Dung tích
                 </h3>
                 <div className="flex gap-3">
-                  {product.variants.map((variant) => (
+                  {(product.variants || []).map((variant) => (
                     <button
                       key={variant}
                       onClick={() => setSelectedVariant(variant)}
@@ -336,13 +384,13 @@ export default function ProductDetailPage() {
                     </button>
                   ))}
                 </div>
-              </div>
+              </div> */}
 
               {/* Colors */}
               <div className="mb-6">
                 <h3 className="font-semibold text-gray-900 mb-3">Màu sắc</h3>
                 <div className="flex gap-3">
-                  {product.colors.map((color) => (
+                  {(product.colors || []).map((color) => (
                     <button
                       key={color}
                       onClick={() => setSelectedColor(color)}
@@ -778,7 +826,7 @@ export default function ProductDetailPage() {
             Sản phẩm liên quan
           </h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {relatedProducts.map((relProduct) => (
+            {(relatedProducts || []).map((relProduct) => (
               <div
                 key={relProduct.id}
                 className="bg-white border-2 border-cyan-100 rounded-2xl overflow-hidden hover:shadow-xl hover:scale-105 transition-all duration-300 cursor-pointer group"
@@ -941,12 +989,6 @@ export default function ProductDetailPage() {
         </div>
       )}
 
-      {/* Floating Chat Button */}
-      <button className="fixed bottom-6 right-6 bg-gradient-to-r from-cyan-400 to-blue-500 text-white p-4 rounded-full shadow-2xl hover:scale-110 transition-transform z-40">
-        <MessageCircle className="h-6 w-6" />
-      </button>
-
-     
      
     </div>
   )

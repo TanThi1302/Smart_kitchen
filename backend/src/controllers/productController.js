@@ -116,7 +116,7 @@ exports.getFeaturedProducts = async (req, res) => {
 exports.createProduct = async (req, res) => {
   try {
     const { name, slug, description, price, sale_price, stock, category_id, brand, specifications, is_featured, is_active } = req.body;
-    const files = req.files || [];
+    const imageUrl = req.body.image; // Cloudinary URL from form-data
 
     // Start transaction
     const client = await db.pool.connect();
@@ -146,16 +146,12 @@ exports.createProduct = async (req, res) => {
       const productResult = await client.query(productQuery, productValues);
       const product = productResult.rows[0];
 
-      // Insert product images
-      if (files && files.length > 0) {
-        const imageQueries = files.map((file, index) => {
-          const imageUrl = `/uploads/${file.filename}`;
-          return client.query(
-            'INSERT INTO product_images (product_id, image_url, is_primary, display_order) VALUES ($1, $2, $3, $4)',
-            [product.id, imageUrl, index === 0, index]
-          );
-        });
-        await Promise.all(imageQueries);
+      // Insert product image if provided
+      if (imageUrl) {
+        await client.query(
+          'INSERT INTO product_images (product_id, image_url, is_primary, display_order) VALUES ($1, $2, $3, $4)',
+          [product.id, imageUrl, true, 0]
+        );
       }
 
       // Get product with images
@@ -171,7 +167,11 @@ exports.createProduct = async (req, res) => {
 
       await client.query('COMMIT');
 
-      res.status(201).json({ success: true, data: finalResult.rows[0] });
+      res.status(201).json({
+        success: true,
+        message: 'Product created successfully',
+        product: finalResult.rows[0]
+      });
     } catch (error) {
       await client.query('ROLLBACK');
       throw error;
@@ -321,6 +321,39 @@ exports.deleteProductImage = async (req, res) => {
     res.json({ success: true, message: 'Product image deleted successfully' });
   } catch (error) {
     console.error('Error deleting product image:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+// Get related products by category
+exports.getRelatedProducts = async (req, res) => {
+  try {
+    const { slug } = req.params;
+
+    // First get the current product to find its category
+    const productQuery = 'SELECT category_id FROM products WHERE slug = $1 AND is_active = true';
+    const productResult = await db.query(productQuery, [slug]);
+
+    if (productResult.rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Product not found' });
+    }
+
+    const categoryId = productResult.rows[0].category_id;
+
+    // Get related products from same category, excluding current product
+    const relatedQuery = `
+      SELECT p.*,
+             (SELECT image_url FROM product_images WHERE product_id = p.id AND is_primary = true LIMIT 1) as image_url
+      FROM products p
+      WHERE p.category_id = $1 AND p.slug != $2 AND p.is_active = true
+      ORDER BY p.created_at DESC
+      LIMIT 4
+    `;
+    const relatedResult = await db.query(relatedQuery, [categoryId, slug]);
+
+    res.json({ success: true, data: relatedResult.rows });
+  } catch (error) {
+    console.error('Error fetching related products:', error);
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };

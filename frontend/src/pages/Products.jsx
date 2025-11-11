@@ -1,19 +1,9 @@
 import { useState, useEffect } from 'react'
-import {
-  ShoppingCart, Search, Filter, ChefHat, Heart,
-  Star, Grid3x3, List, ChevronRight, X, Eye,
-  TrendingUp, Percent, Clock, DollarSign, ArrowUpDown, Plus, Pencil, Trash2
-} from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import {  ShoppingCart, Search, Filter, ChefHat, Heart,  Star, Grid3x3, List, ChevronRight, X, Eye,  TrendingUp, Percent, Clock, DollarSign, ArrowUpDown, Plus, Pencil, Trash2} from 'lucide-react'
 import { getProducts, adminCreateProduct, adminUpdateProduct, adminDeleteProduct, getCategories } from '@/services/api'
 import { useToast } from '@/hooks/use-toast'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+import {  Dialog,  DialogContent,  DialogDescription,  DialogFooter,  DialogHeader,  DialogTitle,} from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -27,11 +17,12 @@ import {
 
 export default function KitchenProductListing() {
   const { toast } = useToast()
+  const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
   const [showSearchSuggestions, setShowSearchSuggestions] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState('')
   const [selectedBrands, setSelectedBrands] = useState([])
-  const [priceRange, setPriceRange] = useState([0, 5000000])
+  const [priceRange, setPriceRange] = useState([0, 1000000000])
   const [selectedRating, setSelectedRating] = useState(0)
   const [sortBy, setSortBy] = useState('created_at')
   const [viewMode, setViewMode] = useState('grid')
@@ -239,7 +230,7 @@ export default function KitchenProductListing() {
       case 'price-asc':
         return (a.sale_price || a.price) - (b.sale_price || b.price)
       case 'price-desc':
-        return (b.sale_price || b.price) - (a.sale_price || a.price)
+        return (b.sale_price || b.price) - (a.sale_price || b.price)
       case 'created_at':
         return new Date(b.created_at) - new Date(a.created_at)
       default:
@@ -293,20 +284,20 @@ export default function KitchenProductListing() {
   }))
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-white to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50">
       
 
       {/* Breadcrumb */}
-      <div className="bg-white border-b border-cyan-100">
+      <div className="bg-white border-b border-blue-100">
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center gap-2 text-sm text-gray-600">
-            <span className="hover:text-cyan-600 cursor-pointer">Trang chủ</span>
+            <span className="hover:text-blue-600 cursor-pointer">Trang chủ</span>
             <ChevronRight className="h-4 w-4" />
-            <span className="hover:text-cyan-600 cursor-pointer">Sản phẩm</span>
+            <span className="hover:text-blue-600 cursor-pointer">Sản phẩm</span>
             {selectedCategory && (
               <>
                 <ChevronRight className="h-4 w-4" />
-                <span className="text-cyan-600 font-medium">
+                <span className="text-blue-600 font-medium">
                   {categories.find(c => c.slug === selectedCategory)?.name}
                 </span>
               </>
@@ -316,7 +307,7 @@ export default function KitchenProductListing() {
       </div>
 
       {/* Search & Filter Bar */}
-      <div className="bg-white border-b border-cyan-100 shadow-sm">
+      <div className="bg-white border-b border-blue-100 shadow-sm">
         <div className="container mx-auto px-4 py-4">
           <div className="flex flex-col md:flex-row gap-4 items-center">
             {/* Search */}
@@ -330,12 +321,12 @@ export default function KitchenProductListing() {
                   setShowSearchSuggestions(e.target.value.length > 0)
                 }}
                 onFocus={() => setShowSearchSuggestions(searchTerm.length > 0)}
-                className="w-full px-4 py-3 pl-12 rounded-xl border-2 border-cyan-200 focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-200 transition-all"
+                className="w-full px-4 py-3 pl-12 rounded-xl border-2 border-blue-200 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-200 transition-all"
               />
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
               
               {showSearchSuggestions && (
-                <div className="absolute top-full left-0 right-0 mt-2 bg-white border-2 border-cyan-100 rounded-xl shadow-xl z-50">
+                <div className="absolute top-full left-0 right-0 mt-2 bg-white border-2 border-blue-100 rounded-xl shadow-xl z-50">
                   {searchSuggestions
                     .filter(s => s.toLowerCase().includes(searchTerm.toLowerCase()))
                     .map((suggestion, i) => (
@@ -345,7 +336,7 @@ export default function KitchenProductListing() {
                           setSearchTerm(suggestion)
                           setShowSearchSuggestions(false)
                         }}
-                        className="w-full text-left px-4 py-3 hover:bg-cyan-50 transition-colors first:rounded-t-xl last:rounded-b-xl"
+                        className="w-full text-left px-4 py-3 hover:bg-blue-50 transition-colors first:rounded-t-xl last:rounded-b-xl"
                       >
                         <Search className="h-4 w-4 inline mr-2 text-gray-400" />
                         {suggestion}
@@ -359,7 +350,7 @@ export default function KitchenProductListing() {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="px-4 py-3 rounded-xl border-2 border-cyan-200 focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-200 bg-white cursor-pointer"
+              className="px-4 py-3 rounded-xl border-2 border-blue-200 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-200 bg-white cursor-pointer"
             >
               <option value="newest">Mới nhất</option>
               <option value="price-asc">Giá tăng dần</option>
@@ -369,13 +360,13 @@ export default function KitchenProductListing() {
             </select>
 
             {/* View Mode */}
-            <div className="flex gap-2 bg-cyan-50 p-1 rounded-xl">
+            <div className="flex gap-2 bg-blue-50 p-1 rounded-xl">
               <button
                 onClick={() => setViewMode('grid')}
                 className={`p-2 rounded-lg transition-all ${
                   viewMode === 'grid' 
-                    ? 'bg-white text-cyan-600 shadow-md' 
-                    : 'text-gray-500 hover:text-cyan-600'
+                    ? 'bg-white text-blue-600 shadow-md' 
+                    : 'text-gray-500 hover:text-blue-600'
                 }`}
               >
                 <Grid3x3 className="h-5 w-5" />
@@ -384,8 +375,8 @@ export default function KitchenProductListing() {
                 onClick={() => setViewMode('list')}
                 className={`p-2 rounded-lg transition-all ${
                   viewMode === 'list' 
-                    ? 'bg-white text-cyan-600 shadow-md' 
-                    : 'text-gray-500 hover:text-cyan-600'
+                    ? 'bg-white text-blue-600 shadow-md' 
+                    : 'text-gray-500 hover:text-blue-600'
                 }`}
               >
                 <List className="h-5 w-5" />
@@ -395,7 +386,7 @@ export default function KitchenProductListing() {
             {/* Mobile Filter Toggle */}
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className="md:hidden bg-cyan-500 text-white px-4 py-3 rounded-xl flex items-center gap-2"
+              className="md:hidden bg-blue-600 text-white px-4 py-3 rounded-xl flex items-center gap-2"
             >
               <Filter className="h-5 w-5" />
               Bộ lọc
@@ -409,20 +400,20 @@ export default function KitchenProductListing() {
         <div className="flex gap-6">
           {/* Sidebar Filters */}
           <aside className={`w-full md:w-80 flex-shrink-0 ${showFilters ? 'block' : 'hidden md:block'}`}>
-            <div className="bg-white rounded-2xl shadow-lg border-2 border-cyan-100 p-6 sticky top-24 max-h-[calc(100vh-120px)] overflow-y-auto">
+            <div className="bg-white rounded-2xl shadow-lg border-2 border-blue-100 p-6 sticky top-24 max-h-[calc(100vh-120px)] overflow-y-auto">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="font-bold text-lg text-gray-800 flex items-center gap-2">
-                  <Filter className="h-5 w-5 text-cyan-600" />
+                  <Filter className="h-5 w-5 text-blue-600" />
                   Bộ lọc
                 </h3>
                 <button
                   onClick={() => {
                     setSelectedCategory('')
                     setSelectedBrands([])
-                    setPriceRange([0, 5000000])
+                    setPriceRange([0, 1000000000])
                     setSelectedRating(0)
                   }}
-                  className="text-sm text-cyan-600 hover:text-cyan-700 font-medium"
+                  className="text-sm text-blue-600 hover:text-blue-700 font-medium"
                 >
                   Xóa tất cả
                 </button>
@@ -438,8 +429,8 @@ export default function KitchenProductListing() {
                       onClick={() => setSelectedCategory(cat.slug)}
                       className={`w-full text-left px-3 py-2 rounded-lg transition-all ${
                         selectedCategory === cat.slug
-                          ? 'bg-gradient-to-r from-cyan-400 to-blue-400 text-white shadow-md'
-                          : 'bg-gray-50 hover:bg-cyan-50 text-gray-700'
+                          ? 'bg-gradient-to-r from-blue-400 to-blue-600 text-white shadow-md'
+                          : 'bg-gray-50 hover:bg-blue-50 text-gray-700'
                       }`}
                     >
                       <div className="flex justify-between items-center">
@@ -465,9 +456,9 @@ export default function KitchenProductListing() {
                         type="checkbox"
                         checked={selectedBrands.includes(brand.name)}
                         onChange={() => toggleBrand(brand.name)}
-                        className="w-4 h-4 text-cyan-600 rounded border-gray-300 focus:ring-cyan-500"
+                        className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
                       />
-                      <span className="text-sm text-gray-700 group-hover:text-cyan-600 transition-colors flex-1">
+                      <span className="text-sm text-gray-700 group-hover:text-blue-600 transition-colors flex-1">
                         {brand.name}
                       </span>
                       <span className="text-xs text-gray-400">({brand.count})</span>
@@ -483,26 +474,26 @@ export default function KitchenProductListing() {
                   <input
                     type="range"
                     min="0"
-                    max="5000000"
+                    max="1000000000"
                     step="100000"
                     value={priceRange[1]}
                     onChange={(e) => setPriceRange([0, parseInt(e.target.value)])}
-                    className="w-full h-2 bg-cyan-200 rounded-lg appearance-none cursor-pointer"
+                    className="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer"
                   />
                   <div className="flex items-center gap-2 text-sm">
                     <input
                       type="number"
                       value={priceRange[0]}
                       onChange={(e) => setPriceRange([parseInt(e.target.value) || 0, priceRange[1]])}
-                      className="w-full px-3 py-2 border-2 border-cyan-200 rounded-lg focus:border-cyan-400 focus:outline-none"
+                      className="w-full px-3 py-2 border-2 border-blue-200 rounded-lg focus:border-blue-600 focus:outline-none"
                       placeholder="Từ"
                     />
                     <span className="text-gray-400">-</span>
                     <input
                       type="number"
                       value={priceRange[1]}
-                      onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value) || 5000000])}
-                      className="w-full px-3 py-2 border-2 border-cyan-200 rounded-lg focus:border-cyan-400 focus:outline-none"
+                      onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value) || 1000000000])}
+                      className="w-full px-3 py-2 border-2 border-blue-200 rounded-lg focus:border-blue-600 focus:outline-none"
                       placeholder="Đến"
                     />
                   </div>
@@ -522,8 +513,8 @@ export default function KitchenProductListing() {
                       onClick={() => setSelectedRating(rating)}
                       className={`w-full text-left px-3 py-2 rounded-lg transition-all flex items-center gap-2 ${
                         selectedRating === rating
-                          ? 'bg-cyan-50 border-2 border-cyan-400'
-                          : 'bg-gray-50 hover:bg-cyan-50 border-2 border-transparent'
+                          ? 'bg-blue-50 border-2 border-blue-600'
+                          : 'bg-gray-50 hover:bg-blue-50 border-2 border-transparent'
                       }`}
                     >
                       <div className="flex">
@@ -546,13 +537,13 @@ export default function KitchenProductListing() {
               <div>
                 <h4 className="font-semibold text-gray-700 mb-3">Nhanh</h4>
                 <div className="flex flex-wrap gap-2">
-                  <button className="px-3 py-1 bg-cyan-50 hover:bg-cyan-100 text-cyan-700 text-sm rounded-full border-2 border-cyan-200 transition-colors">
+                  <button className="px-3 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 text-sm rounded-full border-2 border-blue-200 transition-colors">
                     Khuyến mãi
                   </button>
-                  <button className="px-3 py-1 bg-cyan-50 hover:bg-cyan-100 text-cyan-700 text-sm rounded-full border-2 border-cyan-200 transition-colors">
+                  <button className="px-3 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 text-sm rounded-full border-2 border-blue-200 transition-colors">
                     Còn hàng
                   </button>
-                  <button className="px-3 py-1 bg-cyan-50 hover:bg-cyan-100 text-cyan-700 text-sm rounded-full border-2 border-cyan-200 transition-colors">
+                  <button className="px-3 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 text-sm rounded-full border-2 border-blue-200 transition-colors">
                     Nổi bật
                   </button>
                 </div>
@@ -565,15 +556,15 @@ export default function KitchenProductListing() {
             {/* Results Info */}
             <div className="flex justify-between items-center mb-6">
               <p className="text-gray-600">
-                Hiển thị <span className="font-bold text-cyan-600">{displayedProducts.length}</span> trên{' '}
+                Hiển thị <span className="font-bold text-blue-600">{displayedProducts.length}</span> trên{' '}
                 <span className="font-bold">{sortedProducts.length}</span> sản phẩm
               </p>
             </div>
 
             {displayedProducts.length === 0 ? (
-              <div className="text-center py-16 bg-white rounded-2xl shadow-lg border-2 border-cyan-100">
-                <div className="bg-cyan-100 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Search className="h-12 w-12 text-cyan-400" />
+              <div className="text-center py-16 bg-white rounded-2xl shadow-lg border-2 border-blue-100">
+                <div className="bg-blue-100 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Search className="h-12 w-12 text-blue-400" />
                 </div>
                 <p className="text-gray-500 text-lg font-medium mb-2">Không tìm thấy sản phẩm nào</p>
                 <p className="text-gray-400 text-sm">Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm</p>
@@ -589,7 +580,7 @@ export default function KitchenProductListing() {
                   {displayedProducts.map(product => (
                     <div
                       key={product.id}
-                      className={`bg-white rounded-2xl shadow-lg border-2 border-cyan-100 overflow-hidden hover:shadow-2xl transition-all duration-300 group ${
+                      className={`bg-white rounded-2xl shadow-lg border-2 border-blue-100 overflow-hidden hover:shadow-2xl transition-all duration-300 group ${
                         viewMode === 'list' ? 'flex' : ''
                       }`}
                     >
@@ -635,7 +626,7 @@ export default function KitchenProductListing() {
                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                           <button
                             onClick={() => setQuickViewProduct(product)}
-                            className="bg-white text-cyan-600 px-6 py-3 rounded-xl font-semibold shadow-xl hover:bg-cyan-50 transition-colors flex items-center gap-2 transform scale-90 group-hover:scale-100 transition-transform"
+                            className="bg-white text-blue-600 px-6 py-3 rounded-xl font-semibold shadow-xl hover:bg-blue-50 transition-colors flex items-center gap-2 transform scale-90 group-hover:scale-100 transition-transform"
                           >
                             <Eye className="h-5 w-5" />
                             Xem nhanh
@@ -660,7 +651,10 @@ export default function KitchenProductListing() {
                       {/* Product Info */}
                       <div className={`p-5 ${viewMode === 'list' ? 'flex-1 flex flex-col justify-between' : ''}`}>
                         <div>
-                          <h3 className="font-bold text-gray-800 mb-2 line-clamp-2 group-hover:text-cyan-600 transition-colors cursor-pointer">
+                          <h3
+                            onClick={() => navigate(`/products/${product.slug}`)}
+                            className="font-bold text-gray-800 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors cursor-pointer"
+                          >
                             {product.name}
                           </h3>
                           
@@ -690,12 +684,12 @@ export default function KitchenProductListing() {
                                 <p className="text-sm text-gray-400 line-through mb-1">
                                   {formatPrice(product.price)}
                                 </p>
-                                <p className="text-2xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
+                                <p className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
                                   {formatPrice(product.salePrice)}
                                 </p>
                               </>
                             ) : (
-                              <p className="text-2xl font-bold text-cyan-600">
+                              <p className="text-2xl font-bold text-blue-600">
                                 {formatPrice(product.price)}
                               </p>
                             )}
@@ -710,7 +704,7 @@ export default function KitchenProductListing() {
                         {/* Add to Cart Button */}
                         <button
                           onClick={() => addToCart(product)}
-                          className="w-full bg-gradient-to-r from-cyan-400 to-blue-400 hover:from-cyan-500 hover:to-blue-500 text-white font-semibold py-3 rounded-xl shadow-md hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-2 group"
+                          className="w-full bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white font-semibold py-3 rounded-xl shadow-md hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-2 group"
                         >
                           <ShoppingCart className="h-5 w-5 group-hover:scale-110 transition-transform" />
                           Thêm vào giỏ
@@ -726,7 +720,7 @@ export default function KitchenProductListing() {
                     <button
                       onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                       disabled={currentPage === 1}
-                      className="px-4 py-2 rounded-lg border-2 border-cyan-200 text-cyan-600 font-medium hover:bg-cyan-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      className="px-4 py-2 rounded-lg border-2 border-blue-200 text-blue-600 font-medium hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
                       Trước
                     </button>
@@ -744,8 +738,8 @@ export default function KitchenProductListing() {
                             onClick={() => setCurrentPage(page)}
                             className={`px-4 py-2 rounded-lg font-medium transition-all ${
                               currentPage === page
-                                ? 'bg-gradient-to-r from-cyan-400 to-blue-400 text-white shadow-md'
-                                : 'border-2 border-cyan-200 text-cyan-600 hover:bg-cyan-50'
+                                ? 'bg-gradient-to-r from-blue-500 to-blue-700 text-white shadow-md'
+                                : 'border-2 border-blue-200 text-blue-600 hover:bg-blue-50'
                             }`}
                           >
                             {page}
@@ -764,7 +758,7 @@ export default function KitchenProductListing() {
                     <button
                       onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                       disabled={currentPage === totalPages}
-                      className="px-4 py-2 rounded-lg border-2 border-cyan-200 text-cyan-600 font-medium hover:bg-cyan-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      className="px-4 py-2 rounded-lg border-2 border-blue-200 text-blue-600 font-medium hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
                       Sau
                     </button>
@@ -780,7 +774,7 @@ export default function KitchenProductListing() {
       {quickViewProduct && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-in fade-in">
           <div className="bg-white rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="sticky top-0 bg-white border-b-2 border-cyan-100 px-6 py-4 flex justify-between items-center">
+            <div className="sticky top-0 bg-white border-b-2 border-blue-100 px-6 py-4 flex justify-between items-center">
               <h3 className="text-xl font-bold text-gray-800">Xem nhanh sản phẩm</h3>
               <button
                 onClick={() => setQuickViewProduct(null)}
@@ -812,7 +806,7 @@ export default function KitchenProductListing() {
                     {quickViewProduct.tags.map((tag, i) => (
                       <span
                         key={i}
-                        className="px-3 py-1 bg-cyan-100 text-cyan-700 text-xs font-bold rounded-full"
+                        className="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded-full"
                       >
                         {tag === 'new' ? 'MỚI' : tag === 'bestseller' ? 'BÁN CHẠY' : 'NỔI BẬT'}
                       </span>
@@ -847,18 +841,18 @@ export default function KitchenProductListing() {
                         <p className="text-lg text-gray-400 line-through mb-2">
                           {formatPrice(quickViewProduct.price)}
                         </p>
-                        <p className="text-4xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
+                        <p className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
                           {formatPrice(quickViewProduct.salePrice)}
                         </p>
                       </>
                     ) : (
-                      <p className="text-4xl font-bold text-cyan-600">
+                      <p className="text-4xl font-bold text-blue-600">
                         {formatPrice(quickViewProduct.price)}
                       </p>
                     )}
                   </div>
                   
-                  <div className="bg-cyan-50 border-2 border-cyan-200 rounded-xl p-4 mb-6">
+                  <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-4 mb-6">
                     <p className="text-sm text-gray-600">
                       <span className="font-semibold">Thương hiệu:</span> {quickViewProduct.brand}
                     </p>
@@ -876,7 +870,7 @@ export default function KitchenProductListing() {
                         addToCart(quickViewProduct)
                         setQuickViewProduct(null)
                       }}
-                      className="flex-1 bg-gradient-to-r from-cyan-400 to-blue-400 hover:from-cyan-500 hover:to-blue-500 text-white font-semibold py-4 rounded-xl shadow-md hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-2"
+                      className="flex-1 bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white font-semibold py-4 rounded-xl shadow-md hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-2"
                     >
                       <ShoppingCart className="h-5 w-5" />
                       Thêm vào giỏ
@@ -884,13 +878,13 @@ export default function KitchenProductListing() {
                     
                     <button
                       onClick={() => toggleFavorite(quickViewProduct.id)}
-                      className="px-4 py-4 border-2 border-cyan-400 rounded-xl hover:bg-cyan-50 transition-colors"
+                      className="px-4 py-4 border-2 border-blue-600 rounded-xl hover:bg-blue-50 transition-colors"
                     >
                       <Heart
                         className={`h-6 w-6 ${
                           favorites.includes(quickViewProduct.id)
                             ? 'fill-red-500 text-red-500'
-                            : 'text-cyan-600'
+                            : 'text-blue-600'
                         }`}
                       />
                     </button>
@@ -902,7 +896,7 @@ export default function KitchenProductListing() {
         </div>
       )}
 
-      {/* Footer */}
       
-    </div>) }
-        
+    </div>
+  )
+}
