@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import {
-  ShoppingCart, Heart, Share2, ChefHat, Star, Check,
+  ShoppingCart, Heart, Share2, ChefHat, Check,
   Truck, RefreshCw, Shield, CreditCard, ChevronRight,
   Minus, Plus, MapPin, MessageCircle, Gift, Package,
   ZoomIn, Play, Award, ThumbsUp, Facebook, Twitter,
-  Instagram, Link as LinkIcon, X, ChevronLeft, Info, Loader2, AlertCircle
+  Instagram, Link as LinkIcon, X, ChevronLeft, Info, Loader2, AlertCircle, BookOpen
 } from 'lucide-react'
 import { getProductBySlug, getRelatedProducts } from '@/services/api'
 import { useToast } from '@/hooks/use-toast'
@@ -21,14 +21,11 @@ export default function ProductDetailPage() {
   const [selectedImage, setSelectedImage] = useState(0)
   const [quantity, setQuantity] = useState(1)
   const [selectedVariant, setSelectedVariant] = useState('2L')
-  const [selectedColor, setSelectedColor] = useState('Đỏ')
   const [isFavorite, setIsFavorite] = useState(false)
   const [activeTab, setActiveTab] = useState('description')
   const [showZoom, setShowZoom] = useState(false)
   const [showShareModal, setShowShareModal] = useState(false)
   const [showCartPopup, setShowCartPopup] = useState(false)
-  const [rating, setRating] = useState(0)
-  const [reviewText, setReviewText] = useState('')
 
   // Fetch product data
   const { data: productData, isLoading: productLoading, error: productError } = useQuery({
@@ -47,25 +44,20 @@ export default function ProductDetailPage() {
   const product = productData?.data?.data
   const relatedProducts = relatedData?.data?.data || []
 
-  // Debug logs
-  console.log('Product data:', product)
-  console.log('Related products:', relatedProducts)
-
-  // Debug prices
-  console.log("Debug prices:", {
-    price: product?.price,
-    old_price: product?.old_price,
-    parsedPrice: Number(product?.price),
-    parsedOldPrice: Number(product?.old_price),
-    discount: ((Number(product?.old_price) - Number(product?.price)) / Number(product?.old_price)) * 100,
+  // Handle images - use fallback images
+  const fallbackImages = Array.isArray(product?.images) ? product?.images : (product?.images ? [product?.images] : (product?.image ? [product?.image] : []))
+  const allImages = fallbackImages
+  // Remove duplicates and filter out invalid URLs
+  const images = allImages.filter((img, index, self) =>
+    self.findIndex(i => (typeof i === 'string' ? i : i?.image_url) === (typeof img === 'string' ? img : img?.image_url)) === index
+  ).filter(img => {
+    const url = typeof img === 'string' ? img : img?.image_url
+    return url && url.trim() !== ''
   })
-
-  // Handle images - fallback to single image if images array doesn't exist
-  const images = product?.images || (product?.image ? [product.image] : [])
   const placeholderImage = 'https://via.placeholder.com/500x500?text=No+Image'
 
   // Get image URLs for display
-  const imageUrls = images.map(img => typeof img === 'string' ? img : img?.image_url).filter(Boolean)
+  const imageUrls = images.map(img => typeof img === 'string' ? img : img?.image_url)
 
   // Safe price parsing and formatting
   const parsePrice = (price) => {
@@ -92,60 +84,59 @@ export default function ProductDetailPage() {
     }
   }, [productError, navigate, toast])
 
-  // Reset selected image when product changes
   useEffect(() => {
     setSelectedImage(0)
   }, [product])
 
-  const specifications = [
-    { label: 'Dung tích', value: '2.0 Lít' },
-    { label: 'Công suất', value: '1200W' },
-    { label: 'Chất liệu', value: 'Thép không gỉ 304' },
-    { label: 'Áp suất tối đa', value: '80 kPa' },
-    { label: 'Chương trình nấu', value: '12 chế độ tự động' },
-    { label: 'Điện áp', value: '220V - 50Hz' },
-    { label: 'Bảo hành', value: '24 tháng chính hãng' },
-    { label: 'Xuất xứ', value: 'Nhật Bản' }
-  ]
+  // Parse specifications from product data
+  const getSpecifications = () => {
+    if (!product?.specifications) {
+      return []
+    }
+
+    try {
+      let specs = product.specifications
+      if (typeof specs === 'string') {
+        try {
+          specs = JSON.parse(specs)
+        } catch (e) {
+          // If parsing fails, treat it as a plain string
+          return [{ label: 'Thông số', value: String(specs) }];
+        }
+      }
+
+      if (Array.isArray(specs)) {
+        return specs.map(spec => {
+          if (typeof spec === 'object' && spec !== null && 'label' in spec && 'value' in spec) {
+            return spec;
+          } else if (typeof spec === 'object' && spec !== null) {
+            // Handle cases where array elements are objects but not directly {label, value}
+            return Object.entries(spec).map(([key, value]) => ({ label: key, value: value })).flat();
+          } else {
+            // Fallback for unexpected array elements
+            return { label: 'Thông số', value: String(spec) };
+          }
+        }).flat(); // Flatten in case of nested arrays from object parsing
+      } else if (typeof specs === 'object' && specs !== null) {
+        return Object.entries(specs).map(([key, value]) => ({
+          label: key,
+          value: value
+        }))
+      }
+    } catch (error) {
+      console.error('Error parsing specifications:', error)
+    }
+
+    return []
+  }
+
+  const specifications = getSpecifications()
 
   const policies = [
     { icon: Truck, title: 'Miễn phí vận chuyển', desc: 'Đơn hàng từ 500K' },
     { icon: RefreshCw, title: 'Đổi trả 30 ngày', desc: 'Nếu có lỗi từ NSX' },
     { icon: Shield, title: 'Bảo hành 24 tháng', desc: 'Chính hãng toàn quốc' },
     { icon: CreditCard, title: 'Thanh toán linh hoạt', desc: 'COD, chuyển khoản, trả góp' }
-  ]
-
-  const customerReviews = [
-    {
-      id: 1,
-      name: 'Nguyễn Thị Mai',
-      rating: 5,
-      date: '15/10/2024',
-      comment: 'Sản phẩm rất tốt, nấu cơm nhanh và ngon. Thiết kế đẹp, dễ sử dụng.',
-      images: ['https://images.unsplash.com/photo-1556911261-6bd341186b2f?w=150&h=150&fit=crop'],
-      verified: true,
-      helpful: 24
-    },
-    {
-      id: 2,
-      name: 'Trần Văn Hùng',
-      rating: 4,
-      date: '10/10/2024',
-      comment: 'Chất lượng tốt, đóng gói cẩn thận. Giao hàng nhanh.',
-      images: [],
-      verified: true,
-      helpful: 18
-    },
-    {
-      id: 3,
-      name: 'Lê Thị Hoa',
-      rating: 5,
-      date: '05/10/2024',
-      comment: 'Đã dùng được 2 tuần, rất hài lòng. Nấu nhiều món được, tiết kiệm thời gian.',
-      images: ['https://images.unsplash.com/photo-1585515320310-259814833e62?w=150&h=150&fit=crop'],
-      verified: true,
-      helpful: 32
-    }
   ]
 
   const formatPrice = (price) => {
@@ -155,9 +146,9 @@ export default function ProductDetailPage() {
     }).format(price)
   }
 
-  const salePrice = parsePrice(product?.price)
-  const originalPrice = parsePrice(product?.old_price)
-  const discount = originalPrice && salePrice && originalPrice > salePrice ? Math.round(((originalPrice - salePrice) / originalPrice) * 100) : 0
+  const currentPrice = parsePrice(product?.sale_price) || parsePrice(product?.price)
+  const crossedPrice = parsePrice(product?.sale_price) ? parsePrice(product?.price) : null
+  const discount = crossedPrice && currentPrice && crossedPrice > currentPrice ? Math.round(((crossedPrice - currentPrice) / crossedPrice) * 100) : 0
 
   const handleAddToCart = () => {
     if (!product) return
@@ -165,7 +156,6 @@ export default function ProductDetailPage() {
       ...product,
       quantity,
       variant: selectedVariant,
-      color: selectedColor
     }
     addItem(cartItem)
     setShowCartPopup(true)
@@ -320,92 +310,26 @@ export default function ProductDetailPage() {
                 </p>
               </div>
 
-              {/* Rating & Reviews */}
-              <div className="flex items-center gap-4 mb-6 pb-6 border-b-2 border-gray-100">
-                <div className="flex items-center gap-2">
-                  <div className="flex">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`h-5 w-5 ${
-                          i < Math.floor(product.rating)
-                            ? 'fill-yellow-400 text-yellow-400'
-                            : 'text-gray-300'
-                        }`}
-                      />
-                    ))}
-                  </div>
-                  <span className="font-bold text-gray-900">{product.rating}</span>
-                </div>
-                <div className="h-6 w-px bg-gray-300"></div>
-                <button className="text-cyan-600 hover:text-cyan-700 font-medium flex items-center gap-1">
-                  {product.reviews} đánh giá
-                  <ChevronRight className="h-4 w-4" />
-                </button>
-                <div className="h-6 w-px bg-gray-300"></div>
-                <p className="text-gray-600">
-                  <span className="font-semibold text-gray-900">{product.sold}</span> đã bán
-                </p>
-              </div>
-
               {/* Price */}
               <div className="bg-gradient-to-r from-cyan-50 to-blue-50 rounded-2xl p-6 mb-6">
                 <div className="flex items-center gap-4 mb-2">
                   <p className="text-4xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
-                    {safeFormatPrice(product.price)}
+                    {safeFormatPrice(product?.sale_price || product?.price)}
                   </p>
-                  <span className="bg-red-500 text-white text-lg font-bold px-3 py-1 rounded-full">
-                    -{discount}%
-                  </span>
+                  {discount > 0 && (
+                    <span className="bg-red-500 text-white text-lg font-bold px-3 py-1 rounded-full">
+                      -{discount}%
+                    </span>
+                  )}
                 </div>
-                <p className="text-lg text-gray-500 line-through">
-                  {safeFormatPrice(product.old_price)}
-                </p>
+                {discount > 0 && (
+                  <p className="text-lg text-gray-500 line-through">
+                    {safeFormatPrice(product?.price)}
+                  </p>
+                )}
               </div>
 
-              {/* Variants */}
-              {/* <div className="mb-6">
-                <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                  <Package className="h-5 w-5 text-cyan-600" />
-                  Dung tích
-                </h3>
-                <div className="flex gap-3">
-                  {(product.variants || []).map((variant) => (
-                    <button
-                      key={variant}
-                      onClick={() => setSelectedVariant(variant)}
-                      className={`px-6 py-3 rounded-xl font-semibold transition-all ${
-                        selectedVariant === variant
-                          ? 'bg-gradient-to-r from-cyan-400 to-blue-400 text-white shadow-lg scale-105'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
-                    >
-                      {variant}
-                    </button>
-                  ))}
-                </div>
-              </div> */}
-
-              {/* Colors */}
-              <div className="mb-6">
-                <h3 className="font-semibold text-gray-900 mb-3">Màu sắc</h3>
-                <div className="flex gap-3">
-                  {(product.colors || []).map((color) => (
-                    <button
-                      key={color}
-                      onClick={() => setSelectedColor(color)}
-                      className={`px-6 py-3 rounded-xl font-semibold transition-all ${
-                        selectedColor === color
-                          ? 'bg-gradient-to-r from-cyan-400 to-blue-400 text-white shadow-lg scale-105'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
-                    >
-                      {color}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
+              
               {/* Quantity & Stock */}
               <div className="mb-6">
                 <div className="flex items-center justify-between mb-3">
@@ -456,25 +380,7 @@ export default function ProductDetailPage() {
                 </button>
               </div>
 
-              {/* Secondary Actions */}
-              <div className="flex gap-3 mb-6">
-                <button
-                  onClick={() => setIsFavorite(!isFavorite)}
-                  className="flex-1 border-2 border-cyan-300 text-cyan-600 font-semibold py-3 rounded-xl hover:bg-cyan-50 transition-colors flex items-center justify-center gap-2"
-                >
-                  <Heart
-                    className={`h-5 w-5 ${isFavorite ? 'fill-red-500 text-red-500' : ''}`}
-                  />
-                  Yêu thích
-                </button>
-                <button
-                  onClick={() => setShowShareModal(true)}
-                  className="flex-1 border-2 border-cyan-300 text-cyan-600 font-semibold py-3 rounded-xl hover:bg-cyan-50 transition-colors flex items-center justify-center gap-2"
-                >
-                  <Share2 className="h-5 w-5" />
-                  Chia sẻ
-                </button>
-              </div>
+              
 
               {/* Policies */}
               <div className="grid grid-cols-2 gap-3">
@@ -505,7 +411,7 @@ export default function ProductDetailPage() {
             {[
               { id: 'description', label: 'Mô tả sản phẩm', icon: Info },
               { id: 'specs', label: 'Thông số kỹ thuật', icon: Package },
-              { id: 'reviews', label: 'Đánh giá', icon: Star }
+              { id: 'manual', label: 'Hướng dẫn sử dụng', icon: BookOpen },
             ].map((tab) => {
               const Icon = tab.icon
               return (
@@ -534,80 +440,15 @@ export default function ProductDetailPage() {
           <div className="p-8">
             {activeTab === 'description' && (
               <div className="prose max-w-none">
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                  Nồi Áp Suất Đa Năng SmartCook Pro
-                </h3>
-                <p className="text-gray-700 leading-relaxed mb-6">
-                  Nồi áp suất đa năng SmartCook Pro là sản phẩm tiên tiến nhất của KitchenAid, 
-                  được thiết kế để mang lại trải nghiệm nấu nướng hoàn hảo cho gia đình bạn. 
-                  Với công nghệ áp suất thông minh và 12 chương trình nấu tự động, 
-                  bạn có thể chế biến mọi món ăn từ cơm, soup, thịt kho đến các món hầm, 
-                  nấu chậm một cách dễ dàng và tiết kiệm thời gian.
-                </p>
-                
-                <h4 className="text-xl font-bold text-gray-900 mb-3">Tính năng nổi bật:</h4>
-                <ul className="space-y-2 mb-6">
-                  <li className="flex items-start gap-2">
-                    <Check className="h-5 w-5 text-green-500 mt-1 flex-shrink-0" />
-                    <span className="text-gray-700">
-                      <strong>12 chương trình nấu tự động:</strong> Cơm trắng, cơm gạo lứt, súp, thịt kho, 
-                      hầm xương, nấu chậm, hấp, xào, làm sữa chua, làm bánh, hâm nóng, giữ ấm
-                    </span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="h-5 w-5 text-green-500 mt-1 flex-shrink-0" />
-                    <span className="text-gray-700">
-                      <strong>Công nghệ áp suất thông minh:</strong> Tự động điều chỉnh áp suất 
-                      phù hợp với từng món ăn, đảm bảo thức ăn chín đều và giữ nguyên dinh dưỡng
-                    </span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="h-5 w-5 text-green-500 mt-1 flex-shrink-0" />
-                    <span className="text-gray-700">
-                      <strong>An toàn tuyệt đối:</strong> 10 lớp bảo vệ an toàn, 
-                      van xả áp tự động, khóa nắp thông minh
-                    </span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="h-5 w-5 text-green-500 mt-1 flex-shrink-0" />
-                    <span className="text-gray-700">
-                      <strong>Màn hình LED thông minh:</strong> Hiển thị rõ ràng, 
-                      dễ dàng điều khiển và theo dõi quá trình nấu
-                    </span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="h-5 w-5 text-green-500 mt-1 flex-shrink-0" />
-                    <span className="text-gray-700">
-                      <strong>Tiết kiệm điện năng:</strong> Công suất 1200W, 
-                      tiết kiệm đến 70% thời gian và 50% điện năng so với nấu truyền thống
-                    </span>
-                  </li>
-                </ul>
-
-                <div className="bg-gradient-to-r from-cyan-50 to-blue-50 border-2 border-cyan-200 rounded-2xl p-6">
-                  <h4 className="text-lg font-bold text-cyan-900 mb-3 flex items-center gap-2">
-                    <Gift className="h-6 w-6" />
-                    Quà tặng kèm theo:
-                  </h4>
-                  <ul className="space-y-2">
-                    <li className="flex items-center gap-2 text-gray-700">
-                      <Check className="h-5 w-5 text-cyan-600" />
-                      Xửng hấp inox cao cấp
-                    </li>
-                    <li className="flex items-center gap-2 text-gray-700">
-                      <Check className="h-5 w-5 text-cyan-600" />
-                      Muỗng múc cơm chống dính
-                    </li>
-                    <li className="flex items-center gap-2 text-gray-700">
-                      <Check className="h-5 w-5 text-cyan-600" />
-                      Cốc đong lường
-                    </li>
-                    <li className="flex items-center gap-2 text-gray-700">
-                      <Check className="h-5 w-5 text-cyan-600" />
-                      Sách hướng dẫn 100+ công thức nấu ăn
-                    </li>
-                  </ul>
-                </div>
+                {(product.description_highlights || product.description) ? (
+                  <div className="text-gray-700 leading-relaxed whitespace-pre-line">
+                    {product.description_highlights || product.description}
+                  </div>
+                ) : (
+                  <p className="text-gray-700 leading-relaxed mb-6">
+                    Mô tả sản phẩm chưa được cập nhật.
+                  </p>
+                )}
               </div>
             )}
 
@@ -624,7 +465,6 @@ export default function ProductDetailPage() {
                     >
                       <div className="flex justify-between items-center">
                         <span className="font-semibold text-gray-700">{spec.label}</span>
-                        <span className="text-gray-900 font-bold">{spec.value}</span>
                       </div>
                     </div>
                   ))}
@@ -653,166 +493,151 @@ export default function ProductDetailPage() {
               </div>
             )}
 
-            {activeTab === 'reviews' && (
+            {activeTab === 'manual' && (
               <div>
-                <div className="flex flex-col md:flex-row gap-8 mb-8">
-                  {/* Rating Summary */}
-                  <div className="bg-gradient-to-br from-cyan-50 to-blue-50 border-2 border-cyan-200 rounded-2xl p-8 text-center md:w-80">
-                    <div className="text-6xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent mb-2">
-                      {product.rating}
-                    </div>
-                    <div className="flex justify-center mb-3">
-                      {[...Array(5)].map((_, i) => (
-                        <Star
-                          key={i}
-                          className={`h-6 w-6 ${
-                            i < Math.floor(product.rating)
-                              ? 'fill-yellow-400 text-yellow-400'
-                              : 'text-gray-300'
-                          }`}
-                        />
-                      ))}
-                    </div>
-                    <p className="text-gray-600 font-medium">
-                      {product.reviews} đánh giá
-                    </p>
+                <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                  <BookOpen className="h-7 w-7 text-cyan-600" />
+                  Hướng dẫn sử dụng
+                </h3>
 
-                    {/* Rating Breakdown */}
-                    <div className="mt-6 space-y-2">
-                      {[5, 4, 3, 2, 1].map((star) => (
-                        <div key={star} className="flex items-center gap-2">
-                          <span className="text-sm text-gray-600 w-8">{star}★</span>
-                          <div className="flex-1 bg-gray-200 rounded-full h-2">
-                            <div
-                              className="bg-gradient-to-r from-cyan-400 to-blue-500 h-2 rounded-full"
-                              style={{
-                                width: `${star === 5 ? 75 : star === 4 ? 15 : star === 3 ? 7 : star === 2 ? 2 : 1}%`
-                              }}
-                            ></div>
-                          </div>
-                          <span className="text-sm text-gray-600 w-12 text-right">
-                            {star === 5 ? 256 : star === 4 ? 52 : star === 3 ? 24 : star === 2 ? 7 : 3}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Write Review */}
-                  <div className="flex-1">
-                    <h4 className="font-bold text-xl text-gray-900 mb-4">
-                      Viết đánh giá của bạn
-                    </h4>
-                    <div className="bg-white border-2 border-cyan-200 rounded-2xl p-6">
-                      <div className="mb-4">
-                        <label className="block font-semibold text-gray-700 mb-2">
-                          Đánh giá của bạn
-                        </label>
-                        <div className="flex gap-2">
-                          {[1, 2, 3, 4, 5].map((star) => (
-                            <button
-                              key={star}
-                              onClick={() => setRating(star)}
-                              className="transition-transform hover:scale-110"
-                            >
-                              <Star
-                                className={`h-8 w-8 ${
-                                  star <= rating
-                                    ? 'fill-yellow-400 text-yellow-400'
-                                    : 'text-gray-300'
-                                }`}
-                              />
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div className="mb-4">
-                        <label className="block font-semibold text-gray-700 mb-2">
-                          Nhận xét của bạn
-                        </label>
-                        <textarea
-                          value={reviewText}
-                          onChange={(e) => setReviewText(e.target.value)}
-                          className="w-full border-2 border-cyan-200 rounded-xl p-4 focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-200 min-h-32"
-                          placeholder="Chia sẻ trải nghiệm của bạn về sản phẩm này..."
-                        ></textarea>
-                      </div>
-
-                      <button className="w-full bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-500 hover:to-blue-600 text-white font-semibold py-3 rounded-xl shadow-lg transition-all">
-                        Gửi đánh giá
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Reviews List */}
                 <div className="space-y-6">
-                  <h4 className="font-bold text-xl text-gray-900">
-                    Đánh giá từ khách hàng
-                  </h4>
-                  {customerReviews.map((review) => (
-                    <div
-                      key={review.id}
-                      className="bg-white border-2 border-gray-200 rounded-2xl p-6 hover:border-cyan-300 transition-colors"
-                    >
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                            {review.name.charAt(0)}
-                          </div>
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <p className="font-semibold text-gray-900">{review.name}</p>
-                              {review.verified && (
-                                <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full flex items-center gap-1">
-                                  <Check className="h-3 w-3" />
-                                  Đã mua hàng
-                                </span>
-                              )}
-                            </div>
-                            <p className="text-sm text-gray-500">{review.date}</p>
-                          </div>
-                        </div>
-                        <div className="flex">
-                          {[...Array(5)].map((_, i) => (
-                            <Star
-                              key={i}
-                              className={`h-4 w-4 ${
-                                i < review.rating
-                                  ? 'fill-yellow-400 text-yellow-400'
-                                  : 'text-gray-300'
-                              }`}
-                            />
-                          ))}
-                        </div>
+                  {/* Safety Instructions */}
+                  <div className="bg-gradient-to-r from-red-50 to-orange-50 border-2 border-red-200 rounded-2xl p-6">
+                    <h4 className="font-bold text-lg text-red-900 mb-4 flex items-center gap-2">
+                      <AlertCircle className="h-6 w-6 text-red-600" />
+                      Lưu ý an toàn quan trọng
+                    </h4>
+                    <ul className="space-y-2 text-red-800">
+                      <li className="flex items-start gap-2">
+                        <span className="font-bold">•</span>
+                        Không mở nắp khi nồi đang có áp suất
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="font-bold">•</span>
+                        Không vượt quá mức nước tối đa (2/3 dung tích nồi)
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="font-bold">•</span>
+                        Không sử dụng trên bếp ga không có van an toàn
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="font-bold">•</span>
+                        Giữ khoảng cách an toàn với trẻ em và vật dễ cháy
+                      </li>
+                    </ul>
+                  </div>
+
+                  {/* Usage Steps */}
+                  <div className="bg-gradient-to-r from-cyan-50 to-blue-50 border-2 border-cyan-200 rounded-2xl p-6">
+                    <h4 className="font-bold text-lg text-cyan-900 mb-4 flex items-center gap-2">
+                      <ChefHat className="h-6 w-6 text-cyan-600" />
+                      Cách sử dụng cơ bản
+                    </h4>
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <div>
+                        <h5 className="font-semibold text-gray-900 mb-3">Chuẩn bị:</h5>
+                        <ol className="space-y-2 text-gray-700">
+                          <li className="flex items-start gap-2">
+                            <span className="bg-cyan-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">1</span>
+                            Kiểm tra van an toàn và gioăng cao su
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="bg-cyan-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">2</span>
+                            Cho thực phẩm và nước vào nồi (không quá 2/3)
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="bg-cyan-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">3</span>
+                            Đóng chặt nắp và khóa an toàn
+                          </li>
+                        </ol>
                       </div>
-
-                      <p className="text-gray-700 mb-4 leading-relaxed">
-                        {review.comment}
-                      </p>
-
-                      {review.images.length > 0 && (
-                        <div className="flex gap-2 mb-4">
-                          {review.images.map((img, i) => (
-                            <img
-                              key={i}
-                              src={img}
-                              alt={`Review ${i + 1}`}
-                              className="w-24 h-24 object-cover rounded-xl border-2 border-gray-200 cursor-pointer hover:border-cyan-400 transition-colors"
-                            />
-                          ))}
-                        </div>
-                      )}
-
-                      <div className="flex items-center gap-4 text-sm">
-                        <button className="flex items-center gap-1 text-gray-600 hover:text-cyan-600 transition-colors">
-                          <ThumbsUp className="h-4 w-4" />
-                          Hữu ích ({review.helpful})
-                        </button>
+                      <div>
+                        <h5 className="font-semibold text-gray-900 mb-3">Nấu:</h5>
+                        <ol className="space-y-2 text-gray-700" start="4">
+                          <li className="flex items-start gap-2">
+                            <span className="bg-cyan-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">4</span>
+                            Bật bếp ở mức nhiệt cao cho đến khi có áp suất
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="bg-cyan-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">5</span>
+                            Giảm nhiệt xuống mức trung bình để duy trì áp suất
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="bg-cyan-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">6</span>
+                            Tắt bếp và để áp suất tự nhiên giảm
+                          </li>
+                        </ol>
                       </div>
                     </div>
-                  ))}
+                  </div>
+
+                  {/* Cooking Programs */}
+                  <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-2xl p-6">
+                    <h4 className="font-bold text-lg text-green-900 mb-4 flex items-center gap-2">
+                      <Play className="h-6 w-6 text-green-600" />
+                      Chương trình nấu tự động
+                    </h4>
+                    <div className="grid md:grid-cols-3 gap-4">
+                      <div className="bg-white rounded-xl p-4 border-2 border-green-200">
+                        <h5 className="font-semibold text-gray-900 mb-2">Cơm</h5>
+                        <p className="text-sm text-gray-600">25-35 phút</p>
+                        <p className="text-xs text-gray-500 mt-1">Nấu cơm trắng, cơm nếp</p>
+                      </div>
+                      <div className="bg-white rounded-xl p-4 border-2 border-green-200">
+                        <h5 className="font-semibold text-gray-900 mb-2">Thịt hầm</h5>
+                        <p className="text-sm text-gray-600">35-45 phút</p>
+                        <p className="text-xs text-gray-500 mt-1">Thịt bò, thịt gà, sườn</p>
+                      </div>
+                      <div className="bg-white rounded-xl p-4 border-2 border-green-200">
+                        <h5 className="font-semibold text-gray-900 mb-2">Canh/Súp</h5>
+                        <p className="text-sm text-gray-600">15-25 phút</p>
+                        <p className="text-xs text-gray-500 mt-1">Canh rau, súp gà</p>
+                      </div>
+                      <div className="bg-white rounded-xl p-4 border-2 border-green-200">
+                        <h5 className="font-semibold text-gray-900 mb-2">Đồ hộp</h5>
+                        <p className="text-sm text-gray-600">10-15 phút</p>
+                        <p className="text-xs text-gray-500 mt-1">Thịt hộp, rau củ</p>
+                      </div>
+                      <div className="bg-white rounded-xl p-4 border-2 border-green-200">
+                        <h5 className="font-semibold text-gray-900 mb-2">Hấp</h5>
+                        <p className="text-sm text-gray-600">20-30 phút</p>
+                        <p className="text-xs text-gray-500 mt-1">Hấp cá, hấp trứng</p>
+                      </div>
+                      <div className="bg-white rounded-xl p-4 border-2 border-green-200">
+                        <h5 className="font-semibold text-gray-900 mb-2">Tự nấu</h5>
+                        <p className="text-sm text-gray-600">Theo nhu cầu</p>
+                        <p className="text-xs text-gray-500 mt-1">Điều chỉnh thời gian thủ công</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Maintenance */}
+                  <div className="bg-gradient-to-r from-purple-50 to-indigo-50 border-2 border-purple-200 rounded-2xl p-6">
+                    <h4 className="font-bold text-lg text-purple-900 mb-4 flex items-center gap-2">
+                      <RefreshCw className="h-6 w-6 text-purple-600" />
+                      Bảo quản & Bảo dưỡng
+                    </h4>
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <div>
+                        <h5 className="font-semibold text-gray-900 mb-3">Vệ sinh sau mỗi lần sử dụng:</h5>
+                        <ul className="space-y-1 text-gray-700 text-sm">
+                          <li>• Rửa sạch nồi và nắp bằng nước ấm</li>
+                          <li>• Kiểm tra và làm sạch van an toàn</li>
+                          <li>• Lau khô hoàn toàn trước khi cất giữ</li>
+                          <li>• Không sử dụng chất tẩy rửa mạnh</li>
+                        </ul>
+                      </div>
+                      <div>
+                        <h5 className="font-semibold text-gray-900 mb-3">Bảo dưỡng định kỳ:</h5>
+                        <ul className="space-y-1 text-gray-700 text-sm">
+                          <li>• Thay gioăng cao su 6-12 tháng/lần</li>
+                          <li>• Kiểm tra van an toàn hàng tháng</li>
+                          <li>• Bảo quản nơi khô ráo, thoáng mát</li>
+                          <li>• Mang đến trung tâm bảo hành định kỳ</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
@@ -827,44 +652,28 @@ export default function ProductDetailPage() {
           </h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {(relatedProducts || []).map((relProduct) => (
-              <div
+              <Link
                 key={relProduct.id}
+                to={`/products/${relProduct.slug}`}
                 className="bg-white border-2 border-cyan-100 rounded-2xl overflow-hidden hover:shadow-xl hover:scale-105 transition-all duration-300 cursor-pointer group"
               >
                 <div className="relative overflow-hidden">
                   <img
-                    src={relProduct.image}
+                    src={relProduct.image_url || relProduct.image || placeholderImage}
                     alt={relProduct.name}
                     className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
                   />
-                  <button className="absolute top-3 right-3 bg-white p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Heart className="h-4 w-4 text-gray-600" />
-                  </button>
+                 
                 </div>
                 <div className="p-4">
                   <h4 className="font-semibold text-gray-800 mb-2 line-clamp-2 min-h-[3rem]">
                     {relProduct.name}
                   </h4>
-                  <div className="flex items-center gap-1 mb-2">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`h-3 w-3 ${
-                          i < Math.floor(relProduct.rating)
-                            ? 'fill-yellow-400 text-yellow-400'
-                            : 'text-gray-300'
-                        }`}
-                      />
-                    ))}
-                    <span className="text-xs text-gray-600 ml-1">
-                      {relProduct.rating}
-                    </span>
-                  </div>
                   <p className="text-lg font-bold text-cyan-600">
                     {formatPrice(relProduct.price)}
                   </p>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
@@ -881,7 +690,7 @@ export default function ProductDetailPage() {
           </button>
           <div className="relative max-w-5xl w-full">
             <img
-              src={product.images[selectedImage]}
+              src={imageUrls[selectedImage]}
               alt={product.name}
               className="w-full h-auto rounded-2xl"
             />
@@ -893,7 +702,7 @@ export default function ProductDetailPage() {
                 <ChevronLeft className="h-6 w-6 text-gray-800" />
               </button>
             )}
-            {selectedImage < product.images.length - 1 && (
+            {selectedImage < imageUrls.length - 1 && (
               <button
                 onClick={() => setSelectedImage(selectedImage + 1)}
                 className="absolute right-4 top-1/2 -translate-y-1/2 bg-white p-3 rounded-full shadow-lg hover:scale-110 transition-transform"

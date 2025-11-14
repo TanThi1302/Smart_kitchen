@@ -16,16 +16,17 @@ import {
 } from "../components/about";
 
 import {
-  slides,
-  milestones,
   achievements,
+  slides,
+  certifications,
+  milestones,
   missionVision,
   offerings,
   values,
   colorClasses,
-  certifications,
   contacts,
 } from "../components/about/data";
+
 
 
 export default function About() {

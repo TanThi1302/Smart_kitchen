@@ -151,5 +151,5 @@ export default function Promotion() {
 
       <NewsletterForm />
     </div>
-  )
+  ) 
 }
