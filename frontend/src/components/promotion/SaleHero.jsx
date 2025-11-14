@@ -34,7 +34,7 @@ export function SaleHero({ sale }) {
           animate={{ opacity: 1, y: 0, transition: { delay: 0.15, duration: 0.6 } }}
           className="mt-4 text-lg md:text-xl text-blue-100"
         >
-          Combo Bếp Từ & Máy Hút – Ưu đãi đến 35% cho Kitchen Store
+          Combo Bếp Từ & Máy Hút – Ưu đãi đến 35% tại Kitchen Store
         </motion.p>
 
         <motion.button
