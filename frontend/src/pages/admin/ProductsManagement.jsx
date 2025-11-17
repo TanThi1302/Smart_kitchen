@@ -1,6 +1,6 @@
-import { useState } from 'react'
+ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { getProducts, adminCreateProduct, adminUpdateProduct, adminDeleteProduct, getCategories } from '@/services/api'
+import { getProducts, adminCreateProduct, adminUpdateProduct, adminDeleteProduct, getCategories, adminCreateCategory } from '@/services/api'
 import { uploadImage, createProduct } from '@/services/uploadService'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -47,6 +47,10 @@ export default function ProductsManagement() {
     is_active: true,
   })
 
+  const [newCategoryName, setNewCategoryName] = useState('')
+  const [newCategorySlug, setNewCategorySlug] = useState('')
+  const [showNewCategoryForm, setShowNewCategoryForm] = useState(false)
+
   const { data: productsData, isLoading } = useQuery({
     queryKey: ['admin-products', searchTerm],
     queryFn: async () => {
@@ -64,14 +68,7 @@ export default function ProductsManagement() {
   })
 
   const createMutation = useMutation({
-    mutationFn: async ({ data, images }) => {
-      if (images && images.length > 0) {
-        // Upload image to Cloudinary first
-        const uploadResult = await uploadImage(images[0])
-        data.image = uploadResult.imageUrl
-      }
-      return createProduct(data)
-    },
+    mutationFn: ({ data, images }) => adminCreateProduct(data, images),
     onSuccess: () => {
       queryClient.invalidateQueries(['admin-products'])
       setIsDialogOpen(false)
@@ -123,6 +120,27 @@ export default function ProductsManagement() {
       toast({
         title: "Lỗi",
         description: "Có lỗi xảy ra khi xóa sản phẩm.",
+        variant: "destructive",
+      })
+    },
+  })
+
+  const createCategoryMutation = useMutation({
+    mutationFn: adminCreateCategory,
+    onSuccess: () => {
+      queryClient.invalidateQueries(['categories'])
+      setShowNewCategoryForm(false)
+      setNewCategoryName('')
+      setNewCategorySlug('')
+      toast({
+        title: "Thành công",
+        description: "Danh mục đã được tạo thành công.",
+      })
+    },
+    onError: (error) => {
+      toast({
+        title: "Lỗi",
+        description: "Có lỗi xảy ra khi tạo danh mục.",
         variant: "destructive",
       })
     },
@@ -201,6 +219,22 @@ export default function ProductsManagement() {
       updateMutation.mutate({ id: editingProduct.id, data })
     } else {
       createMutation.mutate({ data, images: selectedImages })
+    }
+  }
+
+  const handleCategoryChange = (value) => {
+    if (value === 'new') {
+      setShowNewCategoryForm(true)
+    } else {
+      setFormData({ ...formData, category_id: value })
+    }
+  }
+
+  const handleCreateCategory = (e) => {
+    e.preventDefault()
+    if (newCategoryName.trim()) {
+      const slug = newCategorySlug.trim() || generateSlug(newCategoryName)
+      createCategoryMutation.mutate({ name: newCategoryName, slug })
     }
   }
 
@@ -431,7 +465,7 @@ export default function ProductsManagement() {
                 <Label htmlFor="category_id">Danh mục *</Label>
                 <Select
                   value={formData.category_id}
-                  onValueChange={(value) => setFormData({ ...formData, category_id: value })}
+                  onValueChange={handleCategoryChange}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Chọn danh mục" />
@@ -442,6 +476,7 @@ export default function ProductsManagement() {
                         {cat.name}
                       </SelectItem>
                     ))}
+                    <SelectItem value="new">+ Thêm danh mục mới</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -535,6 +570,54 @@ export default function ProductsManagement() {
               </Button>
               <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
                 {createMutation.isPending || updateMutation.isPending ? 'Đang lưu...' : 'Lưu'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* New Category Dialog */}
+      <Dialog open={showNewCategoryForm} onOpenChange={setShowNewCategoryForm}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Thêm danh mục mới</DialogTitle>
+            <DialogDescription>
+              Nhập thông tin cho danh mục mới
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleCreateCategory} className="space-y-4">
+            <div>
+              <Label htmlFor="newCategoryName">Tên danh mục *</Label>
+              <Input
+                id="newCategoryName"
+                value={newCategoryName}
+                onChange={(e) => {
+                  setNewCategoryName(e.target.value)
+                  if (!newCategorySlug) {
+                    setNewCategorySlug(generateSlug(e.target.value))
+                  }
+                }}
+                required
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="newCategorySlug">Slug *</Label>
+              <Input
+                id="newCategorySlug"
+                value={newCategorySlug}
+                onChange={(e) => setNewCategorySlug(e.target.value)}
+                required
+              />
+            </div>
+
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setShowNewCategoryForm(false)}>
+                Hủy
+              </Button>
+              <Button type="submit" disabled={createCategoryMutation.isPending}>
+                {createCategoryMutation.isPending ? 'Đang tạo...' : 'Tạo danh mục'}
               </Button>
             </DialogFooter>
           </form>

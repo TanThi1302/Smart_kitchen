@@ -20,11 +20,13 @@ import {
   ShoppingCart,
   Sparkles,
   Truck,
+  X,
   ZoomIn
 } from 'lucide-react'
 import { getProductBySlug, getRelatedProducts } from '@/services/api'
 import { useToast } from '@/hooks/use-toast'
 import useCartStore from '@/store/cartStore'
+import { getProductDescription } from '@/data/productDescriptions'
 
 const FALLBACK_IMAGE = 'https://via.placeholder.com/720x720?text=Smart+Kitchen'
 
@@ -87,30 +89,29 @@ export default function ProductDetailPage() {
     return urls.length ? urls : [FALLBACK_IMAGE]
   }, [product])
 
-  const specifications = useMemo(() => {
-    if (!product?.specifications) return []
-    try {
-      const parsed =
-        typeof product.specifications === 'string'
-          ? JSON.parse(product.specifications)
-          : product.specifications
-      if (Array.isArray(parsed)) {
-        return parsed
-          .map((item) =>
-            typeof item === 'object'
-              ? Object.entries(item).map(([label, value]) => ({ label, value }))
-              : [{ label: 'Thông số', value: item }]
-          )
-          .flat()
-      }
-      if (typeof parsed === 'object' && parsed !== null) {
-        return Object.entries(parsed).map(([label, value]) => ({ label, value }))
-      }
-      return [{ label: 'Thông số', value: String(parsed) }]
-    } catch {
-      return [{ label: 'Thông số', value: product.specifications }]
+
+
+  const productDescription = useMemo(() => {
+    const existing = product?.description_highlights || product?.description
+    if (existing) return existing
+
+    // Fallback to sample descriptions based on product name keywords
+    const name = product?.name?.toLowerCase() || ''
+    if (name.includes('xay sinh tố') || name.includes('blender')) {
+      return getProductDescription('blender').full
+    } else if (name.includes('lò nướng') || name.includes('oven')) {
+      return getProductDescription('oven').full
+    } else if (name.includes('lò vi sóng') || name.includes('microwave')) {
+      return getProductDescription('microwave').full
+    } else if (name.includes('pha cà phê') || name.includes('coffee')) {
+      return getProductDescription('coffee_machine').full
+    } else if (name.includes('chiên không dầu') || name.includes('air fryer')) {
+      return getProductDescription('air_fryer').full
+    } else if (name.includes('rửa bát') || name.includes('dishwasher')) {
+      return getProductDescription('dishwasher').full
     }
-  }, [product?.specifications])
+    return getProductDescription().full
+  }, [product])
 
   const currentPrice = product?.sale_price ?? product?.price ?? 0
   const comparePrice = product?.sale_price ? product?.price : null
@@ -208,7 +209,7 @@ export default function ProductDetailPage() {
             </div>
 
             <div className="rounded-[24px] bg-gradient-to-r from-blue-50 to-blue-100 p-5">
-              <p className="text-xs uppercase tracking-[0.3em] text-blue-500">Giá ưu đãi</p>
+              <p className="text-xs uppercase tracking-[0.3em] text-red-500 font-semibold ">Giá ưu đãi</p>
               <div className="mt-2 flex items-end gap-3">
                 <span className="text-4xl font-semibold text-blue-900">{formatPrice(currentPrice)}</span>
                 {comparePrice && (
@@ -264,22 +265,7 @@ export default function ProductDetailPage() {
               >
                 <ShoppingCart className="h-5 w-5" /> Thêm vào giỏ
               </button>
-              <button
-                onClick={() => setFavorite((prev) => !prev)}
-                className={`rounded-full border px-4 py-4 transition ${
-                  favorite ? 'border-rose-500 text-rose-500' : 'border-blue-200 text-blue-500'
-                }`}
-                aria-label="Yêu thích"
-              >
-                <Heart className={`h-5 w-5 ${favorite ? 'fill-rose-500 text-rose-500' : ''}`} />
-              </button>
-              <button
-                onClick={() => setShowShare(true)}
-                className="rounded-full border border-blue-200 px-4 py-4 text-blue-500"
-                aria-label="Chia sẻ"
-              >
-                <Share2 className="h-5 w-5" />
-              </button>
+             
             </div>
           </div>
         </section>
@@ -288,7 +274,6 @@ export default function ProductDetailPage() {
           <div className="flex flex-wrap gap-3 border-b border-blue-100 pb-3 text-sm font-semibold text-blue-500">
             {[
               { id: 'description', label: 'Mô tả', icon: Info },
-              { id: 'specs', label: 'Thông số', icon: Award },
               { id: 'manual', label: 'Hướng dẫn', icon: BookOpen }
             ].map(({ id, label, icon: Icon }) => (
               <button
@@ -303,23 +288,14 @@ export default function ProductDetailPage() {
             ))}
           </div>
 
-          <div className="pt-6 text-blue-600">
+          <div className="pt-6 text-gray-800">
             {activeTab === 'description' && (
-              <p className="leading-relaxed">
-                {product.description_highlights || product.description || 'Đang cập nhật nội dung.'}
-              </p>
-            )}
-
-            {activeTab === 'specs' && (
-              <div className="grid gap-4 md:grid-cols-2">
-                {specifications.map((spec, index) => (
-                  <div key={`${spec.label}-${index}`} className="rounded-2xl border border-blue-100 bg-blue-50/40 p-4">
-                    <p className="text-xs uppercase tracking-[0.3em] text-blue-400">{spec.label}</p>
-                    <p className="text-base font-semibold text-blue-900">{spec.value}</p>
-                  </div>
-                ))}
+              <div className="leading-relaxed whitespace-pre-line">
+                {productDescription}
               </div>
             )}
+
+
 
             {activeTab === 'manual' && (
               <div className="space-y-4 text-sm">
