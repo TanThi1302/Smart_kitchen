@@ -4,6 +4,8 @@ const helmet = require('helmet');
 const path = require('path');
 const multer = require('multer');
 require('dotenv').config();
+console.log('🔍 DB env check:', process.env.DB_HOST, process.env.DB_NAME, process.env.DB_USER);
+
 
 const routes = require('./routes');
 

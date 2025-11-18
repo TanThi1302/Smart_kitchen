@@ -85,7 +85,9 @@ export default function PostDetail() {
                 <Calendar className="h-4 w-4" />
                 {formatDate(post.published_at || post.created_at)}
               </span>
+
 </div>
+
 
             {post.excerpt && (
               <p className="text-xl text-gray-700 font-medium mb-6 italic">

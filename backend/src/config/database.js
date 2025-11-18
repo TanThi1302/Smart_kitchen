@@ -8,6 +8,12 @@ const pool = new Pool({
   user: process.env.PG_USER,
   password: process.env.PG_PASSWORD,
 });
+console.log('🔍 Database config:', {
+  host: process.env.DB_HOST,
+  database: process.env.DB_NAME,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+});
 
 pool.on('connect', () => {
   console.log('Connected to PostgreSQL database');

@@ -79,6 +79,7 @@ CREATE TABLE posts (
   thumbnail_url VARCHAR(500),
   category VARCHAR(100),
   author VARCHAR(255),
+  post_type VARCHAR(50),
   is_published BOOLEAN DEFAULT false,
   published_at TIMESTAMP,
   created_at TIMESTAMP DEFAULT NOW(),
@@ -150,21 +151,32 @@ INSERT INTO categories (name, slug, description) VALUES
 ('Lò nướng', 'lo-nuong', 'Lò nướng đa năng, nướng bánh chuyên nghiệp'),
 ('Máy rửa bát', 'may-rua-bat', 'Máy rửa bát tự động, tiện lợi');
 
--- Insert sample products
+-- Insert sample products (20 sản phẩm)
 INSERT INTO products (name, slug, description, price, sale_price, stock, category_id, brand, is_featured) VALUES
 ('Bếp từ đôi Malloca MH-03IB', 'bep-tu-doi-malloca-mh-03ib', 'Bếp từ đôi công nghệ Đức, tiết kiệm điện 40%', 8500000, 7650000, 50, 1, 'Malloca', true),
 ('Bếp từ đơn Malloca MH-01I', 'bep-tu-don-malloca-mh-01i', 'Bếp từ đơn nhỏ gọn, phù hợp gia đình nhỏ', 4200000, 3780000, 80, 1, 'Malloca', false),
 ('Máy hút mùi Malloca MC-90IH', 'may-hut-mui-malloca-mc-90ih', 'Máy hút mùi áp tường công suất 900m3/h', 6800000, NULL, 35, 2, 'Malloca', true),
 ('Chậu rửa đôi Malloca MS-6402', 'chau-rua-doi-malloca-ms-6402', 'Chậu rửa inox 304 cao cấp 2 hộc', 3500000, 3150000, 60, 3, 'Malloca', false),
-('Lò nướng âm Malloca MOV-60ES', 'lo-nuong-am-malloca-mov-60es', 'Lò nướng âm tủ 60L, 10 chức năng nướng', 12000000, NULL, 25, 4, 'Malloca', true);
+('Lò nướng âm Malloca MOV-60ES', 'lo-nuong-am-malloca-mov-60es', 'Lò nướng âm tủ 60L, 10 chức năng nướng', 12000000, NULL, 25, 4, 'Malloca', true),
+('Bếp từ Bosch PIF-875N34E', 'bep-tu-bosch-pif-875n34e', 'Bếp từ Bosch series 8, cảm ứng và hẹn giờ thông minh', 14990000, 13500000, 30, 1, 'Bosch', true),
+('Máy hút mùi Bosch DWB97JM60', 'may-hut-mui-bosch-dwb97jm60', 'Máy hút mùi kính cong, công suất 770m3/h', 12990000, 11900000, 20, 2, 'Bosch', true),
+('Chậu rửa Blanco Metra 6 S-IF', 'chau-rua-blanco-metra-6-s-if', 'Chậu rửa Blanco đá nhân tạo, 2 hộc, kèm phụ kiện', 8990000, 8200000, 40, 3, 'Blanco', false),
+('Lò nướng Bosch HBG634BB1B', 'lo-nuong-bosch-hbg634bb1b', 'Lò nướng Bosch 71L, 3D Hotair, màn hình TFT', 16890000, 15800000, 15, 4, 'Bosch', true),
+('Bếp từ Teka IZ-7200FSC', 'bep-tu-teka-iz-7200fsc', 'Bếp từ Teka Tây Ban Nha, 4 vùng nấu, Bridge zone', 10900000, 9500000, 45, 1, 'Teka', false),
+('Máy hút mùi Teka DHC-90-90', 'may-hut-mui-teka-dhc-90-90', 'Máy hút mùi đảo Teka, kính cong, công suất lớn', 12900000, NULL, 18, 2, 'Teka', false),
+('Chậu rửa Teka BE-F 45.1', 'chau-rua-teka-be-f-45.1', 'Chậu rửa Teka inox cao cấp 1 hộc, bộ xả và phụ kiện kèm', 5990000, 5400000, 55, 3, 'Teka', false),
+('Lò nướng Teka HLB 8400', 'lo-nuong-teka-hlb-8400', 'Lò nướng Teka 70L, nhiều chế độ nướng và vệ sinh pyrolytic', 14400000, 13000000, 22, 4, 'Teka', false),
+('Bếp từ Hafele HC-I772B', 'bep-tu-hafele-hc-i772b', 'Bếp từ Hafele 2 vùng, công nghệ IQ-touch, thiết kế âm bàn', 12500000, 11000000, 28, 1, 'Hafele', false),
+('Máy hút mùi Hafele H-N90D', 'may-hut-mui-hafele-h-n90d', 'Máy hút mùi âm tủ Hafele, LED và bộ lọc than hoạt tính', 9500000, 8800000, 35, 2, 'Hafele', false),
+('Chậu rửa Hafele Zen-N45A', 'chau-rua-hafele-zen-n45a', 'Chậu rửa Hafele đá nhân tạo, kích thước 450mm', 6490000, 5900000, 50, 3, 'Hafele', false),
+('Lò nướng Hafele HO-E60D', 'lo-nuong-hafele-ho-e60d', 'Lò nướng Hafele 60L, đa chức năng, kèm khay nướng mềm', 13500000, NULL, 12, 4, 'Hafele', false),
+('Bếp điện từ Eurosun EU-TT650G', 'bep-dien-tu-eurosun-eu-tt650g', 'Bếp điện từ Eurosun 3 vùng nấu, mặt kính Schott', 7900000, 7250000, 38, 1, 'Eurosun', false),
+('Máy hút mùi Eurosun EH-T2169B', 'may-hut-mui-eurosun-eh-t2169b', 'Máy hút mùi Eurosun kính thẳng, công suất 900m3/h', 6200000, 5700000, 60, 2, 'Eurosun', false),
+('Chậu rửa Konox KN8540B', 'chau-rua-konox-kn8540b', 'Chậu rửa Konox inox 304, đáy chịu nhiệt cao', 4490000, 3990000, 70, 3, 'Konox', false);
 
--- Insert sample product images
+-- Insert sample product images for those 20 products
 INSERT INTO product_images (product_id, image_url, is_primary, display_order) VALUES
-(1, 'https://m.media-amazon.com/images/I/81tUeVaBX1L._AC_SX679_.jpg', true, 0),
-(2, 'https://m.media-amazon.com/images/I/81DpE03AdAL._AC_SX679_.jpg', true, 0),
-(3, 'https://m.media-amazon.com/images/I/61OB2hCikTL._AC_SX679_.jpg', true, 0),
-(4, 'https://images.unsplash.com/photo-1621953884578-02a3ddb96f46?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1742', true, 0),
-(5, 'https://m.media-amazon.com/images/I/71NntrH1zgL._SX522_.jpg', true, 0);
+
 
 -- Insert sample promotions
 IINSERT INTO promotions (title, description, discount_percent, discount_amount, start_date, end_date, is_active) VALUES
@@ -174,9 +186,70 @@ IINSERT INTO promotions (title, description, discount_percent, discount_amount, 
 ('Voucher thiết bị gia đình', 'Tặng ngay 3.000.000đ khi hoàn tất bản vẽ bếp trong tháng này', NULL, 3000000, NOW(), NOW() + INTERVAL '40 days', true);
 
 -- Insert sample posts
-INSERT INTO posts (title, slug, content, excerpt, category, author, is_published, published_at) VALUES
-('Cách chọn bếp từ phù hợp cho gia đình', 'cach-chon-bep-tu-phu-hop', 'Nội dung chi tiết về cách chọn bếp từ...', 'Hướng dẫn chi tiết giúp bạn chọn bếp từ phù hợp', 'Hướng dẫn', 'Admin', true, NOW()),
-('Top 5 máy hút mùi bán chạy 2025', 'top-5-may-hut-mui-ban-chay-2025', 'Danh sách 5 máy hút mùi được yêu thích nhất...', 'Tổng hợp những máy hút mùi được khách hàng tin dùng', 'Tin tức', 'Admin', true, NOW());
+INSERT INTO posts 
+(title, slug, content, excerpt, thumbnail_url, category, author, post_type, is_published, published_at)
+VALUES
+(
+  'Bếp từ thông minh – Giải pháp hiện đại cho căn bếp Việt',
+  'bep-tu-thong-minh',
+  'Bếp từ ngày càng trở thành lựa chọn phổ biến...',
+  'Bếp từ ngày càng được ưa chuộng...',
+  'https://placehold.co/600x600/0066CC/FFFFFF/png?text=Bep+Tu+Doi',
+  'Bếp từ',
+  'Admin',
+  'tin-tuc',
+  true,
+  NOW()
+),
+(
+  'Máy hút mùi – Giữ cho không gian bếp luôn trong lành',
+  'may-hut-mui-hien-dai',
+  'Máy hút mùi giúp loại bỏ khói, dầu mỡ...',
+  'Giữ không gian bếp trong lành...',
+  'https://placehold.co/600x600/0066CC/FFFFFF/png?text=May+Hut+Mui',
+  'Máy hút mùi',
+  'Admin',
+  'tin-tuc',
+  true,
+  NOW()
+),
+(
+  'Ưu đãi đặc biệt Malloca 2025 – Giảm đến 30%',
+  'uu-dai-malloca-2025',
+  'Chương trình khuyến mãi lớn nhất năm dành cho khách hàng Malloca...',
+  'Giảm giá đến 30% cho các sản phẩm bếp và thiết bị nhà bếp cao cấp.',
+  'https://placehold.co/600x600/FF6600/FFFFFF/png?text=Khuyen+Mai',
+  'Khuyến mãi',
+  'Admin',
+  'khuyen-mai',
+  true,
+  NOW()
+),
+(
+  'Malloca tại Vietbuild 2025 – Không gian bếp thông minh',
+  'malloca-vietbuild-2025',
+  'Malloca tham dự triển lãm Vietbuild 2025 với các sản phẩm công nghệ mới...',
+  'Khám phá xu hướng bếp thông minh tại Vietbuild 2025.',
+  'https://placehold.co/600x600/009900/FFFFFF/png?text=Su+Kien',
+  'Sự kiện',
+  'Admin',
+  'su-kien',
+  true,
+  NOW()
+),
+(
+  '5 mẹo giữ bếp luôn sạch sẽ',
+  '5-meo-giu-bep-sach',
+  'Cẩm nang giúp căn bếp của bạn luôn gọn gàng và sạch sẽ...',
+  'Bí quyết giữ bếp sáng bóng mỗi ngày.',
+  'https://placehold.co/600x600/0066FF/FFFFFF/png?text=Cam+Nang+Bep',
+  'Cẩm nang bếp',
+  'Admin',
+  'cam-nang-bep',
+  true,
+  NOW()
+);
+
 
 -- Insert sample admin user (password: admin123)
 INSERT INTO users (email, password_hash, full_name, role) VALUES
