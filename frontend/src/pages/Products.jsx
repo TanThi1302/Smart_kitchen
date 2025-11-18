@@ -1,15 +1,17 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowUpRight, Search, ShoppingCart, Sparkles, X } from 'lucide-react'
+import { ArrowUpRight, Grid3X3, List, Search, ShoppingCart, Sparkles, X } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import {
   getCategories,
-  getProducts
+  getProducts,
+  getProductSuggestions
 } from '@/services/api'
+import { getBrands } from '@/services/brands'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
-const FALLBACK_IMAGE = 'https://via.placeholder.com/400x400?text=Product'
+const FALLBACK_IMAGE = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjY2NjY2NjIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMjAiIGZpbGw9IiMwMDAwMDAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5Qcm9kdWN0PC90ZXh0Pjwvc3ZnPg=='
 
 const formatPrice = (value) => {
   const numeric = Number(value)
@@ -20,19 +22,18 @@ const formatPrice = (value) => {
   })
 }
 
-const getSoldCount = (product) => {
-  if (!product) return 0
-  return product.sold_count ?? product.sold ?? product.total_sold ?? product.sales ?? 0
-}
+
 
 export default function KitchenProductListing() {
   const { toast } = useToast()
   const navigate = useNavigate()
   const [products, setProducts] = useState([])
   const [categories, setCategories] = useState([])
+  const [brands, setBrands] = useState([])
   const [searchTerm, setSearchTerm] = useState('')
   const [sortBy, setSortBy] = useState('created_at')
   const [selectedCategory, setSelectedCategory] = useState('')
+  const [selectedBrand, setSelectedBrand] = useState('')
   const [activeNav, setActiveNav] = useState('all')
   const [priceFilter, setPriceFilter] = useState('all')
   const [currentPage, setCurrentPage] = useState(1)
@@ -40,25 +41,21 @@ export default function KitchenProductListing() {
   const [totalProducts, setTotalProducts] = useState(0)
   const [loading, setLoading] = useState(true)
   const [suggestionPanel, setSuggestionPanel] = useState(null)
+  const [viewMode, setViewMode] = useState('grid')
 
   const productsPerPage = 12
 
   useEffect(() => {
     fetchProducts()
     fetchCategories()
+    fetchBrands()
   }, [])
 
   useEffect(() => {
     fetchProducts()
-  }, [currentPage, selectedCategory, searchTerm, sortBy])
+  }, [currentPage, selectedCategory, searchTerm, sortBy, selectedBrand])
 
-  const normalizeText = (text = '') =>
-    text
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/\p{Diacritic}/gu, '')
-      .replace(/\s+/g, ' ')
-      .trim()
+
 
   const categoriesById = useMemo(() => {
     const map = {}
@@ -68,27 +65,13 @@ export default function KitchenProductListing() {
     return map
   }, [categories])
 
-  const fixedCategoryConfigs = useMemo(() => {
-    const desiredLabels = ['Bếp từ', 'Tủ lạnh', 'Lò nướng', 'Máy hút mùi']
-    return desiredLabels.map((label) => {
-      const normalizedLabel = normalizeText(label)
-      const matchedCategory = categories.find((cat) =>
-        normalizeText(cat.name || '').includes(normalizedLabel)
-      )
-      const slug = matchedCategory?.slug || ''
-      const value = slug || normalizedLabel.replace(/\s+/g, '-')
-      return {
-        label,
-        value,
-        slug,
-        normalizedLabel
-      }
-    })
-  }, [categories])
-
   const navItems = useMemo(
-    () => [{ label: 'Tất cả', value: 'all' }, ...fixedCategoryConfigs],
-    [fixedCategoryConfigs]
+    () => [{ label: 'Tất cả', value: 'all' }, ...categories.map(cat => ({
+      label: cat.name,
+      value: cat.slug,
+      slug: cat.slug
+    }))],
+    [categories]
   )
 
   const priceFilters = useMemo(
@@ -114,26 +97,17 @@ export default function KitchenProductListing() {
     }
 
     if (activeNav !== 'all') {
-      const targetCategory = fixedCategoryConfigs.find((cat) => cat.value === activeNav)
-      if (targetCategory) {
-        list = list.filter((product) => {
-          const productCategory = categoriesById[product.category_id]
-          const productCategorySlug =
-            product.category_slug || product.category?.slug || productCategory?.slug
-          if (targetCategory.slug) {
-            return productCategorySlug === targetCategory.slug
-          }
-          const productCategoryName = productCategory?.name || product.category?.name || ''
-          return (
-            normalizeText(productCategoryName).includes(targetCategory.normalizedLabel) ||
-            normalizeText(product.name).includes(targetCategory.normalizedLabel)
-          )
-        })
-      }
+      // activeNav is now the category slug directly
+      list = list.filter((product) => {
+        const productCategory = categoriesById[product.category_id]
+        const productCategorySlug =
+          product.category_slug || product.category?.slug || productCategory?.slug
+        return productCategorySlug === activeNav
+      })
     }
 
     return list
-  }, [products, activeNav, priceFilter, priceFilters, fixedCategoryConfigs, categoriesById])
+  }, [products, activeNav, priceFilter, priceFilters, categoriesById])
 
   const showingFrom = products.length === 0 ? 0 : (currentPage - 1) * productsPerPage + 1
   const showingTo = products.length === 0 ? 0 : showingFrom + products.length - 1
@@ -157,8 +131,7 @@ export default function KitchenProductListing() {
     if (value === 'all') {
       setSelectedCategory('')
     } else {
-      const targetCategory = fixedCategoryConfigs.find((cat) => cat.value === value)
-      setSelectedCategory(targetCategory?.slug || '')
+      setSelectedCategory(value)
     }
   }
 
@@ -184,165 +157,45 @@ export default function KitchenProductListing() {
     navigate(`/products/${slug}`)
   }
 
-  const suggestionLibrary = useMemo(
-    () => [
-      {
-        keywords: ['chau rua', 'bon rua', 'sink'],
-        title: 'Hoàn thiện khu vực chậu rửa',
-        description: 'Gợi ý các phụ kiện hỗ trợ vệ sinh và sắp xếp quanh bồn rửa.',
-        items: [
-          {
-            name: 'Khăn lau nhà bếp sợi tre',
-            price: 120000,
-            image: 'https://images.unsplash.com/photo-1522312346375-d1a52e2b99b3?w=400'
-          },
-          {
-            name: 'Giá treo khăn Inox dán tường',
-            price: 350000,
-            image: 'https://images.unsplash.com/photo-1505693314120-0d443867891c?w=400'
-          },
-          {
-            name: 'Kệ úp chén mini',
-            price: 580000,
-            image: 'https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=400'
-          }
-        ]
-      },
-      {
-        keywords: ['bep tu', 'bep dien', 'hob'],
-        title: 'Phụ kiện cho bếp từ',
-        description: 'Tối ưu trải nghiệm nấu nướng với dụng cụ đồng bộ.',
-        items: [
-          {
-            name: 'Bộ nồi inox đáy từ 5 món',
-            price: 2190000,
-            image: 'https://images.unsplash.com/photo-1473093226795-af9932fe5856?w=400'
-          },
-          {
-            name: 'Dụng cụ lau mặt bếp kính',
-            price: 190000,
-            image: 'https://images.unsplash.com/photo-1514996937319-344454492b37?w=400'
-          },
-          {
-            name: 'Khay gia vị xoay 360°',
-            price: 420000,
-            image: 'https://images.unsplash.com/photo-1505576399279-565b52d4ac71?w=400'
-          }
-        ]
-      },
-      {
-        keywords: ['lo nuong', 'oven'],
-        title: 'Set baking đi kèm',
-        description: 'Chuẩn bị đầy đủ khuôn khay và dụng cụ nướng.',
-        items: [
-          {
-            name: 'Bộ khuôn bánh không dính 3 size',
-            price: 690000,
-            image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400'
-          },
-          {
-            name: 'Thảm nướng silicon chịu nhiệt',
-            price: 230000,
-            image: 'https://images.unsplash.com/photo-1466978913421-dad2ebd01d17?w=400'
-          },
-          {
-            name: 'Nhiệt kế lò điện tử',
-            price: 310000,
-            image: 'https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?w=400'
-          }
-        ]
-      },
-      {
-        keywords: ['tu lanh', 'fridge'],
-        title: 'Phụ kiện tối ưu tủ lạnh',
-        description: 'Giữ thực phẩm gọn gàng và tiết kiệm diện tích.',
-        items: [
-          {
-            name: 'Hộp trữ thực phẩm thủy tinh',
-            price: 420000,
-            image: 'https://images.unsplash.com/photo-1502740479091-635887520276?w=400'
-          },
-          {
-            name: 'Khử mùi than hoạt tính',
-            price: 150000,
-            image: 'https://images.unsplash.com/photo-1612198525090-d819cdb4c90c?w=400'
-          },
-          {
-            name: 'Khay trứng hai tầng',
-            price: 260000,
-            image: 'https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=400'
-          }
-        ]
-      },
-      {
-        keywords: ['may hut mui', 'hut mui', 'hood'],
-        title: 'Giữ bếp thơm tho',
-        description: 'Bổ sung bộ lọc và dụng cụ vệ sinh cho máy hút mùi.',
-        items: [
-          {
-            name: 'Bộ lọc than hoạt tính thay thế',
-            price: 490000,
-            image: 'https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=400'
-          },
-          {
-            name: 'Dung dịch vệ sinh inox',
-            price: 180000,
-            image: 'https://images.unsplash.com/photo-1481833761820-0509d3217039?w=400'
-          },
-          {
-            name: 'Chổi lau khe hẹp đa năng',
-            price: 95000,
-            image: 'https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=400'
-          }
-        ]
-      }
-    ],
-    []
-  )
+
 
   const defaultSuggestion = {
     title: 'Gợi ý nâng cấp gian bếp',
     description: 'Những món đồ nhỏ xinh giúp hoàn thiện trải nghiệm sử dụng.',
-    items: [
-      {
-        name: 'Set lọ gia vị thủy tinh',
-        price: 370000,
-        image: 'https://images.unsplash.com/photo-1511690656952-34342bb7c2f2?w=400'
-      },
-      {
-        name: 'Thảm bếp chống mỏi',
-        price: 640000,
-        image: 'https://images.unsplash.com/photo-1503602642458-232111445657?w=400'
-      },
-      {
-        name: 'Bộ dao thép Nhật 3 món',
-        price: 1450000,
-        image: 'https://images.unsplash.com/photo-1506368083636-6defb67639c0?w=400'
-      }
-    ]
+    items: []
   }
 
-  const handleSuggestionClick = (product) => {
+  const handleSuggestionClick = async (product) => {
     if (!product) return
 
-    const productCategory = categoriesById[product.category_id]
-    const productCategoryName = normalizeText(productCategory?.name || product.category?.name || '')
-    const normalizedProductName = normalizeText(product.name)
+    try {
+      const response = await getProductSuggestions(product.slug)
+      const suggestionData = response?.data?.data
 
-    const matchedSuggestion =
-      suggestionLibrary.find((config) =>
-        config.keywords.some(
-          (keyword) =>
-            normalizedProductName.includes(keyword) || productCategoryName.includes(keyword)
-        )
-      ) || defaultSuggestion
-
-    setSuggestionPanel({
-      title: matchedSuggestion.title,
-      description: matchedSuggestion.description,
-      baseProduct: product.name,
-      items: matchedSuggestion.items
-    })
+      if (suggestionData) {
+        setSuggestionPanel({
+          title: suggestionData.title,
+          description: suggestionData.description,
+          baseProduct: product.name,
+          items: suggestionData.items
+        })
+      } else {
+        setSuggestionPanel({
+          title: defaultSuggestion.title,
+          description: defaultSuggestion.description,
+          baseProduct: product.name,
+          items: defaultSuggestion.items
+        })
+      }
+    } catch (error) {
+      console.error('Error fetching suggestions:', error)
+      setSuggestionPanel({
+        title: defaultSuggestion.title,
+        description: defaultSuggestion.description,
+        baseProduct: product.name,
+        items: defaultSuggestion.items
+      })
+    }
   }
 
   const handlePrevPage = () => {
@@ -365,7 +218,8 @@ export default function KitchenProductListing() {
         limit: productsPerPage,
         category: selectedCategory,
         search: searchTerm.trim(),
-        sort: sortBy
+        sort: sortBy,
+        brand: selectedBrand
       }
       const response = await getProducts(params)
       const data = response?.data?.data ?? []
@@ -398,9 +252,19 @@ export default function KitchenProductListing() {
   const fetchCategories = async () => {
     try {
       const response = await getCategories()
-      setCategories(Array.isArray(response?.data) ? response.data : [])
-    } catch {
+      const cats = Array.isArray(response?.data?.data) ? response.data.data : []
+      setCategories(cats)
+    } catch (error) {
       setCategories([])
+    }
+  }
+
+  const fetchBrands = async () => {
+    try {
+      const response = await getBrands()
+      setBrands(Array.isArray(response?.data) ? response.data : [])
+    } catch {
+      setBrands([])
     }
   }
 
@@ -411,9 +275,6 @@ export default function KitchenProductListing() {
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.35em] text-blue-500">Kitchen Store</p>
             <h1 className="mt-2 text-4xl font-semibold text-slate-900">Sản phẩm</h1>
-            <p className="mt-1 text-base text-slate-500">
-              Bộ sưu tập nhà bếp hiện đại với thiết kế tối giản, sắc xanh dương làm điểm nhấn để tạo cảm giác sang trọng.
-            </p>
           </div>
 
           <div className="flex flex-col gap-4 rounded-[32px] border border-blue-100/80 bg-white/90 p-5 shadow-[0px_25px_70px_rgba(59,130,246,0.15)] lg:flex-row lg:items-center lg:justify-between">
@@ -429,6 +290,31 @@ export default function KitchenProductListing() {
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
+              <div className="flex items-center gap-2 rounded-full border border-blue-100 bg-white p-1">
+                <button
+                  type="button"
+                  onClick={() => setViewMode('grid')}
+                  className={`rounded-full p-2 transition ${viewMode === 'grid'
+                      ? 'bg-blue-600 text-white'
+                      : 'text-slate-500 hover:text-blue-600'
+                    }`}
+                  title="Xem dạng lưới"
+                >
+                  <Grid3X3 className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewMode('list')}
+                  className={`rounded-full p-2 transition ${viewMode === 'list'
+                      ? 'bg-blue-600 text-white'
+                      : 'text-slate-500 hover:text-blue-600'
+                    }`}
+                  title="Xem dạng danh sách"
+                >
+                  <List className="h-4 w-4" />
+                </button>
+              </div>
+
               <Select value={sortBy} onValueChange={handleSortChange}>
                 <SelectTrigger className="h-14 w-44 rounded-full border-blue-100 bg-white text-sm font-medium text-slate-600 focus:ring-blue-200">
                   <SelectValue placeholder="Sắp xếp" />
@@ -452,10 +338,27 @@ export default function KitchenProductListing() {
                   ))}
                 </SelectContent>
               </Select>
+
+              <Select value={selectedBrand} onValueChange={(value) => {
+                setSelectedBrand(value === "all" ? "" : value)
+                setCurrentPage(1)
+              }}>
+                <SelectTrigger className="h-14 w-44 rounded-full border-blue-100 bg-white text-sm font-medium text-slate-500 focus:ring-blue-200">
+                  <SelectValue placeholder="Thương hiệu" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tất cả thương hiệu</SelectItem>
+                  {brands.map((brand) => (
+                    <SelectItem key={brand} value={brand}>
+                      {brand}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-4 rounded-[28px] border border-blue-100/80 bg-white/70 px-6 py-4 text-sm text-slate-500">
+          <div className="flex flex-wrap items-center gap-4 rounded-[28px] border border-blue-100/80 bg-white/70 px-6 py-4 text-sm text-slate-500 font-semibold">
             {heroStats.map((stat) => (
               <div key={stat.label} className="flex flex-col">
                 <span className="text-xs uppercase tracking-[0.3em] text-blue-400">{stat.label}</span>
@@ -474,11 +377,10 @@ export default function KitchenProductListing() {
                   key={item.value}
                   type="button"
                   onClick={() => handleNavChange(item.value)}
-                  className={`rounded-full px-5 py-2 text-sm font-medium transition ${
-                    isActive
+                  className={`rounded-full px-5 py-2 text-sm font-medium transition ${isActive
                       ? 'bg-blue-600 text-white shadow-lg shadow-blue-200'
                       : 'bg-white/70 text-slate-500 hover:text-blue-600'
-                  }`}
+                    }`}
                 >
                   {item.label}
                 </button>
@@ -486,7 +388,7 @@ export default function KitchenProductListing() {
             })}
           </div>
 
-          <section className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <section className={`gap-5 ${viewMode === 'grid' ? 'grid sm:grid-cols-2 lg:grid-cols-4' : 'flex flex-col'}`}>
             {loading && skeletonCards}
 
             {!loading && visualProducts.length === 0 && (
@@ -503,18 +405,15 @@ export default function KitchenProductListing() {
               visualProducts.map((product) => (
                 <div
                   key={product.id}
-                  className="group relative flex h-full flex-col overflow-hidden rounded-[24px] border border-blue-100 bg-white p-4 shadow-[0px_18px_40px_rgba(37,99,235,0.12)] transition hover:-translate-y-1 hover:shadow-[0px_24px_60px_rgba(37,99,235,0.25)]"
+                  className={`group relative overflow-hidden rounded-[24px] border border-blue-100 bg-white shadow-[0px_18px_40px_rgba(37,99,235,0.12)] transition hover:-translate-y-1 hover:shadow-[0px_24px_60px_rgba(37,99,235,0.25)] ${viewMode === 'grid'
+                      ? 'flex h-full flex-col p-4'
+                      : 'flex flex-row p-1 gap-1.5'
+                    }`}
                 >
-                  <div className="absolute inset-x-4 top-4 flex items-center justify-between text-[10px] font-semibold uppercase tracking-[0.35em] text-blue-400">
-                    <span>{product.brand || 'Sang trọng'}</span>
-                    {product.salePrice && (
-                      <span className="rounded-full bg-blue-600/10 px-2 py-0.5 text-blue-600">-{
-                        Math.round(((product.price - product.salePrice) / product.price) * 100)
-                      }%</span>
-                    )}
-                  </div>
-
-                  <div className="mb-4 mt-6 aspect-[4/3] overflow-hidden rounded-[20px] bg-gradient-to-br from-blue-50 via-white to-blue-100">
+                  <div className={`overflow-hidden bg-gradient-to-br from-blue-50 via-white to-blue-100 ${viewMode === 'grid'
+                      ? 'mb-4 mt-6 aspect-[4/3] rounded-[20px]'
+                      : 'flex-shrink-0 w-48 h-48 rounded-[28px] self-center'
+                    }`}>
                     <img
                       src={product.image || FALLBACK_IMAGE}
                       alt={product.name}
@@ -524,7 +423,8 @@ export default function KitchenProductListing() {
                   </div>
 
                   <div
-                    className="flex flex-1 flex-col cursor-pointer"
+                    className={`flex flex-1 flex-col cursor-pointer ${viewMode === 'grid' ? '' : 'justify-center'
+                      }`}
                     role="button"
                     tabIndex={0}
                     onClick={() => handleViewDetail(product)}
@@ -535,54 +435,77 @@ export default function KitchenProductListing() {
                       }
                     }}
                   >
-                    <h3 className="text-base font-semibold text-slate-900 line-clamp-2 min-h-[48px]">{product.name}</h3>
-                    <p className="mt-1 line-clamp-2 text-sm text-slate-500 min-h-[40px]">
+                    <div className={`flex items-center justify-between ${viewMode === 'grid' ? 'absolute inset-x-4 top-4' : 'mb-1'
+                      }`}>
+                      <span className={`font-semibold uppercase tracking-[0.35em] text-blue-400 ${viewMode === 'grid' ? 'text-[10px]' : 'text-[10px]'
+                        }`}>{product.brand || 'Sang trọng'}</span>
+                      {product.salePrice && (
+                        <span className={`rounded-full bg-blue-600/10 px-2 py-0.5 text-blue-600 ${viewMode === 'grid' ? 'text-[10px]' : 'text-[10px]'
+                          }`}>{
+                            Math.round(((product.price - product.salePrice) / product.price) * 100)
+                          }%</span>
+                      )}
+                    </div>
+
+                    <h3 className={`font-semibold text-slate-900 line-clamp-2 ${viewMode === 'grid' ? 'text-base min-h-[48px] mt-6' : 'text-xs mb-1 leading-tight'
+                      }`}>{product.name}</h3>
+                    <p className={`line-clamp-2 text-slate-500 ${viewMode === 'grid' ? 'mt-1 text-sm min-h-[40px]' : 'text-[10px] mb-1 leading-tight'
+                      }`}>
                       {product.description || 'Thiết kế tinh giản, sang trọng cho không gian bếp hiện đại.'}
                     </p>
 
-                    <div className="mt-4 space-y-2">
-                      <div className="min-h-[46px] space-y-2">
-                        {product.salePrice ? (
-                          <>
-                            <p className="text-xs text-slate-400 line-through">{formatPrice(product.price)}</p>
-                            <p className="text-xl font-bold text-slate-900">{formatPrice(product.salePrice)}</p>
-                          </>
-                        ) : (
-                          <>
-                            <p className="text-xs opacity-0">placeholder</p>
-                            <p className="text-xl font-bold text-slate-900">{formatPrice(product.price)}</p>
-                          </>
-                        )}
-                      </div>
+                    <div className={`${viewMode === 'grid' ? 'mt-4 space-y-2 min-h-[46px]' : 'mt-auto space-y-1'
+                      }`}>
+                      {product.salePrice ? (
+                        <>
+                          <p className={`text-slate-400 line-through ${viewMode === 'grid' ? 'text-xs' : 'text-[10px]'
+                            }`}>{formatPrice(product.price)}</p>
+                          <p className={`font-bold text-slate-900 ${viewMode === 'grid' ? 'text-xl' : 'text-sm'
+                            }`}>{formatPrice(product.salePrice)}</p>
+                        </>
+                      ) : (
+                        <p className={`font-bold text-slate-900 ${viewMode === 'grid' ? 'text-xl' : 'text-sm'
+                          }`}>{formatPrice(product.price)}</p>
+                      )}
+                    </div>
 
+                    <div className={`${viewMode === 'grid' ? 'mt-auto pt-3 flex flex-col gap-2' : 'mt-1 flex gap-1'
+                      }`}>
                       <Button
                         type="button"
                         onClick={(event) => {
                           event.stopPropagation()
-                          // TODO: Integrate actual cart logic here
                         }}
-                        className="w-full rounded-full bg-blue-600 px-4 py-2 text-[11px] font-semibold tracking-wide text-white hover:bg-blue-500"
+                        className={`rounded-2xl bg-blue-600 text-white hover:bg-blue-500 transition-colors ${viewMode === 'grid'
+                            ? 'w-full px-4 py-2 text-[11px] font-semibold tracking-wide'
+                            : 'flex items-center space-x-2 px-3 py-1 text-[12px] font-medium'
+                          }`}
                       >
-                        <ShoppingCart className="mr-2 h-4 w-4" />
-                        Thêm vào giỏ
+                        <ShoppingCart
+                          className={`${viewMode === 'grid' ? 'mr-1 h-4 w-4' : 'h-4 w-4'
+                            }`}
+                        />
+                        <span>{viewMode === 'grid' ? 'Thêm vào giỏ' : 'Thêm vào giỏ'}</span>
                       </Button>
-                    </div>
 
-                    <div className="mt-auto pt-3">
                       <button
                         type="button"
                         onClick={(event) => {
                           event.stopPropagation()
                           handleSuggestionClick(product)
                         }}
-                        className="flex w-full items-center justify-between rounded-2xl bg-blue-600/5 px-3 py-2 text-[12px] font-medium text-blue-700 transition hover:bg-blue-600/10"
+                        className={`rounded-2xl bg-blue-600/5 text-blue-700 transition hover:bg-blue-600/10 ${viewMode === 'grid'
+                            ? 'flex w-full items-center justify-between px-3 py-2 text-[12px] font-medium'
+                            : 'px-1.5 py-1 text-[10px]'
+                          }`}
                         title="Xem thêm sản phẩm tương tự"
                       >
-                        <span className="flex items-center gap-2">
-                          <Sparkles className="h-4 w-4" />
-                          Gợi ý dành cho bạn
+                        <span className="flex items-center gap-2 font-semibold">
+                          <Sparkles className={`${viewMode === 'grid' ? 'h-4 w-4' : 'h-3 w-3'
+                            }`} />
+                          {viewMode === 'grid' ? 'Gợi ý dành cho bạn' : 'Gợi ý dành cho bạn'}
                         </span>
-                        <ArrowUpRight className="h-4 w-4" />
+                        {viewMode === 'grid'  && <ArrowUpRight className="h-4 w-4" />}
                       </button>
                     </div>
                   </div>
@@ -671,7 +594,15 @@ export default function KitchenProductListing() {
                     <p className="text-sm font-semibold text-slate-800 line-clamp-1">{item.name}</p>
                     <p className="text-xs text-slate-500">{formatPrice(item.price)}</p>
                   </div>
-                  <Button size="sm" className="h-8 rounded-full px-3 text-xs">
+                  <Button
+                    size="sm"
+                    className="h-8 rounded-full px-3 text-xs"
+                    onClick={() => {
+                      if (item.slug) {
+                        navigate(`/products/${item.slug}`)
+                      }
+                    }}
+                  >
                     Xem
                   </Button>
                 </div>

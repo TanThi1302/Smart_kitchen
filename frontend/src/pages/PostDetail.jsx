@@ -86,7 +86,9 @@ export default function PostDetail() {
                 {formatDate(post.published_at || post.created_at)}
               </span>
 
+
 </div>
+
 
 
             {post.excerpt && (

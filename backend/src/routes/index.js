@@ -12,9 +12,11 @@ const upload = require('../middleware/uploadMiddleware');
 
 // Product routes
 router.get('/products', productController.getAllProducts);
+router.get('/products/brands', productController.getBrands);
 router.get('/products/featured', productController.getFeaturedProducts);
 router.get('/products/:slug', productController.getProductBySlug);
 router.get('/products/:slug/related', productController.getRelatedProducts);
+router.get('/products/:slug/suggestions', productController.getProductSuggestions);
 router.get('/welcome', productController.welcome);
 
 // Category routes
@@ -42,7 +44,7 @@ router.get('/jobs', contactController.getJobPostings);
 
 // Admin routes (in production, add authentication middleware)
 // Products
-router.post('/admin/products', productController.createProduct);
+router.post('/admin/products', upload.array('images', 10), productController.createProduct);
 router.put('/admin/products/:id', productController.updateProduct);
 router.delete('/admin/products/:id', productController.deleteProduct);
 

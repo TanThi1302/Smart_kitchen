@@ -34,6 +34,7 @@ export const submitContactMessage = (data) => api.post('/contact', data);
 
 // Product Images
 export const getProductImages = (productId) => api.get(`/products/${productId}/images`);
+export const getProductSuggestions = (slug) => api.get(`/products/${slug}/suggestions`);
 export const adminAddProductImage = (productId, data) => api.post(`/admin/products/${productId}/images`, data);
 export const adminUpdateProductImage = (imageId, data) => api.put(`/admin/products/images/${imageId}`, data);
 export const adminDeleteProductImage = (imageId) => api.delete(`/admin/products/images/${imageId}`);
@@ -71,5 +72,8 @@ export const adminCreatePost = (data) => api.post('/admin/posts', data);
 export const adminUpdatePost = (id, data) => api.put(`/admin/posts/${id}`, data);
 export const adminDeletePost = (id) => api.delete(`/admin/posts/${id}`);
 export const adminGetContactMessages = (params) => api.get('/admin/contact-messages', { params });
+export const adminCreateCategory = (data) => api.post('/admin/categories', data);
+export const adminUpdateCategory = (id, data) => api.put(`/admin/categories/${id}`, data);
+export const adminDeleteCategory = (id) => api.delete(`/admin/categories/${id}`);
 
 export default api;

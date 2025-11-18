@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { formatPrice } from '@/lib/utils'
 import useCartStore from '@/store/cartStore'
 import { ShoppingCart, ArrowRight, Tag } from 'lucide-react'
+import { NewsletterForm } from '@/components/promotion/NewsletterForm'
 
 export default function Home() {
   const { data: productsData, isLoading: productsLoading } = useQuery({
@@ -40,7 +41,7 @@ export default function Home() {
 
   const handleAddToCart = (product) => {
     addItem(product)
-    // TODO: Show toast notification
+
   }
 
   return (
@@ -257,6 +258,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Newsletter */}
+      <NewsletterForm />
     </div>
   )
 }
