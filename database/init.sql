@@ -19,12 +19,16 @@ CREATE TABLE products (
   name VARCHAR(255) NOT NULL,
   slug VARCHAR(255) UNIQUE NOT NULL,
   description TEXT,
+  description_basic TEXT,
+  description_highlights TEXT,
+  bonus_gift TEXT,
   price DECIMAL(10,2) NOT NULL,
   sale_price DECIMAL(10,2),
   stock INTEGER DEFAULT 0,
   category_id INTEGER REFERENCES categories(id) ON DELETE SET NULL,
   brand VARCHAR(100),
   specifications JSONB,
+  colors JSONB DEFAULT '[]'::jsonb,
   is_featured BOOLEAN DEFAULT false,
   is_active BOOLEAN DEFAULT true,
   created_at TIMESTAMP DEFAULT NOW(),
@@ -172,32 +176,14 @@ INSERT INTO products (name, slug, description, price, sale_price, stock, categor
 
 -- Insert sample product images for those 20 products
 INSERT INTO product_images (product_id, image_url, is_primary, display_order) VALUES
-(1, 'https://placehold.co/600x600/FF7F00/FFFFFF/png?text=Bếp+Từ+Đôi+Malloca+MH-03IB', true, 0),
-(2, 'https://placehold.co/600x600/FF7F00/FFFFFF/png?text=Bếp+Từ+Đơn+Malloca+MH-01I', true, 0),
-(3, 'https://placehold.co/600x600/FF7F00/FFFFFF/png?text=Máy+Hút+Mùi+Malloca+MC-90IH', true, 0),
-(4, 'https://placehold.co/600x600/FF7F00/FFFFFF/png?text=Chậu+Rửa+Đôi+Malloca+MS-6402', true, 0),
-(5, 'https://placehold.co/600x600/FF7F00/FFFFFF/png?text=Lò+Nướng+Âm+Malloca+MOV-60ES', true, 0),
-(6, 'https://placehold.co/600x600/007700/FFFFFF/png?text=Bếp+Từ+Bosch+PIF-875N34E', true, 0),
-(7, 'https://placehold.co/600x600/007700/FFFFFF/png?text=Máy+Hút+Mùi+Bosch+DWB97JM60', true, 0),
-(8, 'https://placehold.co/600x600/007700/FFFFFF/png?text=Chậu+Rửa+Blanco+Metra+6+S-IF', true, 0),
-(9, 'https://placehold.co/600x600/007700/FFFFFF/png?text=Lò+Nướng+Bosch+HBG634BB1B', true, 0),
-(10, 'https://placehold.co/600x600/003366/FFFFFF/png?text=Bếp+Từ+Teka+IZ-7200FSC', true, 0),
-(11, 'https://placehold.co/600x600/003366/FFFFFF/png?text=Máy+Hút+Mùi+Teka+DHC-90-90', true, 0),
-(12, 'https://placehold.co/600x600/003366/FFFFFF/png?text=Chậu+Rửa+Teka+BE-F+45.1', true, 0),
-(13, 'https://placehold.co/600x600/003366/FFFFFF/png?text=Lò+Nướng+Teka+HLB+8400', true, 0),
-(14, 'https://placehold.co/600x600/990000/FFFFFF/png?text=Bếp+Từ+Hafele+HC-I772B', true, 0),
-(15, 'https://placehold.co/600x600/990000/FFFFFF/png?text=Máy+Hút+Mùi+Hafele+H-N90D', true, 0),
-(16, 'https://placehold.co/600x600/990000/FFFFFF/png?text=Chậu+Rửa+Hafele+Zen-N45A', true, 0),
-(17, 'https://placehold.co/600x600/990000/FFFFFF/png?text=Lò+Nướng+Hafele+HO-E60D', true, 0),
-(18, 'https://placehold.co/600x600/CC0000/FFFFFF/png?text=Bếp+Điện+Từ+Eurosun+EU-TT650G', true, 0),
-(19, 'https://placehold.co/600x600/CC0000/FFFFFF/png?text=Máy+Hút+Mùi+Eurosun+EH-T2169B', true, 0),
-(20, 'https://placehold.co/600x600/CC0000/FFFFFF/png?text=Chậu+Rửa+Konox+KN8540B', true, 0);
 
 
 -- Insert sample promotions
-INSERT INTO promotions (title, description, discount_percent, start_date, end_date, is_active) VALUES
-('Khuyến mãi Tết 2025', 'Giảm giá 10-20% toàn bộ sản phẩm', 15.00, NOW(), NOW() + INTERVAL '30 days', true),
-('Flash Sale Cuối Tuần', 'Giảm 25% các sản phẩm bếp từ', 25.00, NOW(), NOW() + INTERVAL '7 days', true);
+IINSERT INTO promotions (title, description, discount_percent, discount_amount, start_date, end_date, is_active) VALUES
+('Khuyến mãi Tết 2025', 'Giảm giá 10-20% toàn bộ sản phẩm', 15.00, NULL, NOW(), NOW() + INTERVAL '30 days', true),
+('Flash Sale Cuối Tuần', 'Giảm 25% các sản phẩm bếp từ', 25.00, NULL, NOW(), NOW() + INTERVAL '7 days', true),
+('Ưu đãi khai trương showroom Đà Nẵng', 'Ưu đãi 20% phí thiết kế và combo thiết bị khi khai trương showroom mới', 20.00, NULL, NOW() + INTERVAL '5 days', NOW() + INTERVAL '25 days', true),
+('Voucher thiết bị gia đình', 'Tặng ngay 3.000.000đ khi hoàn tất bản vẽ bếp trong tháng này', NULL, 3000000, NOW(), NOW() + INTERVAL '40 days', true);
 
 -- Insert sample posts
 INSERT INTO posts 

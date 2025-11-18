@@ -13,6 +13,7 @@ const api = axios.create({
 export const getProducts = (params) => api.get('/products', { params });
 export const getFeaturedProducts = () => api.get('/products/featured');
 export const getProductBySlug = (slug) => api.get(`/products/${slug}`);
+export const getRelatedProducts = (slug) => api.get(`/products/${slug}/related`);
 
 // Categories
 export const getCategories = () => api.get('/categories');
@@ -31,8 +32,36 @@ export const getPromotions = () => api.get('/promotions');
 export const getJobPostings = () => api.get('/jobs');
 export const submitContactMessage = (data) => api.post('/contact', data);
 
+// Product Images
+export const getProductImages = (productId) => api.get(`/products/${productId}/images`);
+export const adminAddProductImage = (productId, data) => api.post(`/admin/products/${productId}/images`, data);
+export const adminUpdateProductImage = (imageId, data) => api.put(`/admin/products/images/${imageId}`, data);
+export const adminDeleteProductImage = (imageId) => api.delete(`/admin/products/images/${imageId}`);
+
 // Admin APIs
-export const adminCreateProduct = (data) => api.post('/admin/products', data);
+export const adminCreateProduct = (data, images) => {
+  const formData = new FormData();
+
+  // Add form data
+  Object.keys(data).forEach(key => {
+    if (data[key] !== null && data[key] !== undefined) {
+      formData.append(key, data[key]);
+    }
+  });
+
+  // Add images
+  if (images && images.length > 0) {
+    images.forEach((image, index) => {
+      formData.append('images', image);
+    });
+  }
+
+  return api.post('/admin/products', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+};
 export const adminUpdateProduct = (id, data) => api.put(`/admin/products/${id}`, data);
 export const adminDeleteProduct = (id) => api.delete(`/admin/products/${id}`);
 export const adminGetOrders = (params) => api.get('/admin/orders', { params });
