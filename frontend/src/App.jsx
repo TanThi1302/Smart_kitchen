@@ -11,6 +11,7 @@ import Promotion from './pages/Promotion'
 import About from './pages/About'
 import Contact from './pages/Contact'
 import Admin from './pages/admin/Admin'
+import { Toaster } from './components/ui/toaster'
 
 function App() {
   return (

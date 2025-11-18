@@ -13,7 +13,7 @@ export function formatPrice(price) {
 }
 
 export function formatDate(date) {
-  return new Intl.DateFormat('vi-VN', {
+  return new Intl.DateTimeFormat('vi-VN', {
     year: 'numeric',
     month: 'long',
     day: 'numeric'
