@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getProducts, adminCreateProduct, adminUpdateProduct, adminDeleteProduct, getCategories } from '@/services/api'
+import { uploadImage, createProduct } from '@/services/uploadService'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -63,7 +64,14 @@ export default function ProductsManagement() {
   })
 
   const createMutation = useMutation({
-    mutationFn: ({ data, images }) => adminCreateProduct(data, images),
+    mutationFn: async ({ data, images }) => {
+      if (images && images.length > 0) {
+        // Upload image to Cloudinary first
+        const uploadResult = await uploadImage(images[0])
+        data.image = uploadResult.imageUrl
+      }
+      return createProduct(data)
+    },
     onSuccess: () => {
       queryClient.invalidateQueries(['admin-products'])
       setIsDialogOpen(false)

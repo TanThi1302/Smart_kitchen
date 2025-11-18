@@ -33,8 +33,8 @@ export default function Header() {
             <Link to="/posts" className="text-gray-700 hover:text-primary font-medium transition-colors">
               Tin tức
             </Link>
-            <Link to="/posts" className="text-gray-700 hover:text-primary font-medium transition-colors">
-             Khuyến mãi
+            <Link to="/promotion" className="text-gray-700 hover:text-primary font-medium transition-colors">
+              Khuyến mãi
             </Link>
             <Link to="/about" className="text-gray-700 hover:text-primary font-medium transition-colors">
               Giới thiệu
@@ -96,7 +96,14 @@ export default function Header() {
                 className="text-gray-700 hover:text-primary font-medium py-2"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Tin tức
+                Tin tức 
+              </Link>
+              <Link
+                to="/promotion"
+                className="text-gray-700 hover:text-primary font-medium py-2"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Khuyến mãi
               </Link>
               <Link
                 to="/about"

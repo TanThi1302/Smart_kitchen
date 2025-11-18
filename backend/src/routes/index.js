@@ -7,11 +7,14 @@ const promotionController = require('../controllers/promotionController');
 const orderController = require('../controllers/orderController');
 const postController = require('../controllers/postController');
 const contactController = require('../controllers/contactController');
+const uploadController = require('../controllers/uploadController');
+const upload = require('../middleware/uploadMiddleware');
 
 // Product routes
 router.get('/products', productController.getAllProducts);
 router.get('/products/featured', productController.getFeaturedProducts);
 router.get('/products/:slug', productController.getProductBySlug);
+router.get('/products/:slug/related', productController.getRelatedProducts);
 router.get('/welcome', productController.welcome);
 
 // Category routes
@@ -30,20 +33,16 @@ router.get('/orders/:id', orderController.getOrderById);
 router.get('/posts', postController.getAllPosts);
 router.get('/posts/:slug', postController.getPostBySlug);
 
+// Upload routes
+router.post('/upload-image', upload.single('image'), uploadController.uploadImage);
+
 // Contact & Other routes
 router.post('/contact', contactController.createContactMessage);
 router.get('/jobs', contactController.getJobPostings);
 
 // Admin routes (in production, add authentication middleware)
 // Products
-router.post('/admin/products', (req, res, next) => {
-  req.upload.array('images', 10)(req, res, (err) => {
-    if (err) {
-      return res.status(400).json({ success: false, message: err.message });
-    }
-    next();
-  });
-}, productController.createProduct);
+router.post('/admin/products', productController.createProduct);
 router.put('/admin/products/:id', productController.updateProduct);
 router.delete('/admin/products/:id', productController.deleteProduct);
 

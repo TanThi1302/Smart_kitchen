@@ -6,8 +6,8 @@ import ProductDetail from './pages/ProductDetail'
 import Cart from './pages/Cart'
 import Checkout from './pages/Checkout'
 import Posts from './pages/Posts'
-import Promotions from './pages/Promotion'
 import PostDetail from './pages/PostDetail'
+import Promotion from './pages/Promotion'
 import About from './pages/About'
 import Contact from './pages/Contact'
 import Admin from './pages/admin/Admin'
@@ -22,6 +22,7 @@ function App() {
         <Route path="cart" element={<Cart />} />
         <Route path="checkout" element={<Checkout />} />
         <Route path="posts" element={<Posts />} />
+        <Route path="promotion" element={<Promotion />} />
         <Route path="posts/:slug" element={<PostDetail />} />
         <Route path="about" element={<About />} />
         <Route path="contact" element={<Contact />} />
