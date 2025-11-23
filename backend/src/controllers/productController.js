@@ -115,17 +115,69 @@ exports.getFeaturedProducts = async (req, res) => {
 // Admin: Create product
 exports.createProduct = async (req, res) => {
   try {
-    const { name, slug, description, price, sale_price, stock, category_id, brand, specifications, is_featured } = req.body;
+    const { name, slug, description, price, sale_price, stock, category_id, brand, specifications, is_featured, is_active } = req.body;
+    const imageUrl = req.body.image; // Cloudinary URL from form-data
 
-    const query = `
-      INSERT INTO products (name, slug, description, price, sale_price, stock, category_id, brand, specifications, is_featured)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-      RETURNING *
-    `;
-    const values = [name, slug, description, price, sale_price || null, stock, category_id, brand, specifications, is_featured || false];
-    const result = await db.query(query, values);
+    // Start transaction
+    const client = await db.pool.connect();
+    try {
+      await client.query('BEGIN');
 
-    res.status(201).json({ success: true, data: result.rows[0] });
+      // Generate unique slug
+      let uniqueSlug = slug;
+      let counter = 1;
+      while (true) {
+        const slugCheckQuery = 'SELECT id FROM products WHERE slug = $1';
+        const slugCheckResult = await client.query(slugCheckQuery, [uniqueSlug]);
+        if (slugCheckResult.rows.length === 0) {
+          break; // Slug is unique
+        }
+        uniqueSlug = `${slug}-${counter}`;
+        counter++;
+      }
+
+      // Insert product
+      const productQuery = `
+        INSERT INTO products (name, slug, description, price, sale_price, stock, category_id, brand, specifications, is_featured, is_active)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+        RETURNING *
+      `;
+      const productValues = [name, uniqueSlug, description, price, sale_price || null, stock, category_id, brand, specifications, is_featured || false, is_active !== undefined ? is_active : true];
+      const productResult = await client.query(productQuery, productValues);
+      const product = productResult.rows[0];
+
+      // Insert product image if provided
+      if (imageUrl) {
+        await client.query(
+          'INSERT INTO product_images (product_id, image_url, is_primary, display_order) VALUES ($1, $2, $3, $4)',
+          [product.id, imageUrl, true, 0]
+        );
+      }
+
+      // Get product with images
+      const finalProductQuery = `
+        SELECT p.*,
+               COALESCE(json_agg(pi.image_url) FILTER (WHERE pi.image_url IS NOT NULL), '[]') as images
+        FROM products p
+        LEFT JOIN product_images pi ON p.id = pi.product_id
+        WHERE p.id = $1
+        GROUP BY p.id
+      `;
+      const finalResult = await client.query(finalProductQuery, [product.id]);
+
+      await client.query('COMMIT');
+
+      res.status(201).json({
+        success: true,
+        message: 'Product created successfully',
+        product: finalResult.rows[0]
+      });
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
   } catch (error) {
     console.error('Error creating product:', error);
     res.status(500).json({ success: false, message: 'Server error' });
@@ -175,6 +227,151 @@ exports.deleteProduct = async (req, res) => {
     res.json({ success: true, message: 'Product deleted successfully' });
   } catch (error) {
     console.error('Error deleting product:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+exports.getProductImages = async (req, res) => {
+  try {
+    const { productId } = req.params;
+
+    const query = 'SELECT * FROM product_images WHERE product_id = $1 ORDER BY display_order';
+    const result = await db.query(query, [productId]);
+
+    res.json({ success: true, data: result.rows });
+  } catch (error) {
+    console.error('Error fetching product images:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+// Admin: Add product image
+exports.addProductImage = async (req, res) => {
+  try {
+    const { productId } = req.params;
+    const { image_url, is_primary = false, display_order = 0 } = req.body;
+
+    // If setting as primary, unset other primary images
+    if (is_primary) {
+      await db.query('UPDATE product_images SET is_primary = false WHERE product_id = $1', [productId]);
+    }
+
+    const query = `
+      INSERT INTO product_images (product_id, image_url, is_primary, display_order)
+      VALUES ($1, $2, $3, $4)
+      RETURNING *
+    `;
+    const values = [productId, image_url, is_primary, display_order];
+    const result = await db.query(query, values);
+
+    res.status(201).json({ success: true, data: result.rows[0] });
+  } catch (error) {
+    console.error('Error adding product image:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+// Admin: Update product image
+exports.updateProductImage = async (req, res) => {
+  try {
+    const { imageId } = req.params;
+    const { image_url, is_primary, display_order } = req.body;
+
+    // If setting as primary, unset other primary images for this product
+    if (is_primary) {
+      const productQuery = 'SELECT product_id FROM product_images WHERE id = $1';
+      const productResult = await db.query(productQuery, [imageId]);
+      if (productResult.rows.length > 0) {
+        await db.query('UPDATE product_images SET is_primary = false WHERE product_id = $1', [productResult.rows[0].product_id]);
+      }
+    }
+
+    const query = `
+      UPDATE product_images
+      SET image_url = $1, is_primary = $2, display_order = $3
+      WHERE id = $4
+      RETURNING *
+    `;
+    const values = [image_url, is_primary, display_order, imageId];
+    const result = await db.query(query, values);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Product image not found' });
+    }
+
+    res.json({ success: true, data: result.rows[0] });
+  } catch (error) {
+    console.error('Error updating product image:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+// Admin: Delete product image
+exports.deleteProductImage = async (req, res) => {
+  try {
+    const { imageId } = req.params;
+
+    const query = 'DELETE FROM product_images WHERE id = $1 RETURNING id';
+    const result = await db.query(query, [imageId]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Product image not found' });
+    }
+
+    res.json({ success: true, message: 'Product image deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting product image:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+// Get related products by category
+exports.getRelatedProducts = async (req, res) => {
+  try {
+    const { slug } = req.params;
+
+    // First get the current product to find its category
+    const productQuery = 'SELECT category_id FROM products WHERE slug = $1 AND is_active = true';
+    const productResult = await db.query(productQuery, [slug]);
+
+    if (productResult.rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Product not found' });
+    }
+
+    const categoryId = productResult.rows[0].category_id;
+
+    // Get related products from same category, excluding current product
+    const relatedQuery = `
+      SELECT p.*,
+             (SELECT image_url FROM product_images WHERE product_id = p.id AND is_primary = true LIMIT 1) as image_url
+      FROM products p
+      WHERE p.category_id = $1 AND p.slug != $2 AND p.is_active = true
+      ORDER BY p.created_at DESC
+      LIMIT 4
+    `;
+    const relatedResult = await db.query(relatedQuery, [categoryId, slug]);
+
+    res.json({ success: true, data: relatedResult.rows });
+  } catch (error) {
+    console.error('Error fetching related products:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+// Welcome endpoint with logging
+exports.welcome = async (req, res) => {
+  try {
+    // Log request metadata
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.path} - Welcome endpoint accessed`);
+
+    res.json({
+      success: true,
+      message: 'Welcome to the Smart Kitchen API!',
+      timestamp: new Date().toISOString(),
+      version: '1.0.0'
+    });
+  } catch (error) {
+    console.error('Error in welcome endpoint:', error);
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };

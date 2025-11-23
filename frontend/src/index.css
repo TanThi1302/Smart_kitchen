@@ -58,7 +58,12 @@
     --chart-5: 340 75% 55%;
   }
 }
-
+@layer components {
+  .heading-safe {
+    @apply bg-clip-text text-transparent leading-[1.15] md:leading-[1.1] pb-1 overflow-visible;
+    -webkit-text-fill-color: transparent; 
+  }
+}
 @layer base {
   * {
     @apply border-border;

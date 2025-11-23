@@ -1,25 +1,5 @@
 {
-  "name": "kitchen-ecommerce",
-  "version": "1.0.0",
-  "description": "Kitchen E-commerce Website - Full Stack Application",
-  "scripts": {
-    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
-    "dev:backend": "cd backend && npm run dev",
-    "dev:frontend": "cd frontend && npm run dev",
-    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
-    "build": "cd frontend && npm run build",
-    "start:backend": "cd backend && npm start",
-    "start:frontend": "cd frontend && npm run preview"
-  },
-  "keywords": [
-    "ecommerce",
-    "react",
-    "nodejs",
-    "postgresql"
-  ],
-  "author": "",
-  "license": "ISC",
-  "devDependencies": {
-    "concurrently": "^8.2.2"
+  "dependencies": {
+    "cloudinary": "^2.8.0"
   }
 }
