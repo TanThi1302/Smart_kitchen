@@ -42,5 +42,6 @@ export const adminCreatePost = (data) => api.post('/admin/posts', data);
 export const adminUpdatePost = (id, data) => api.put(`/admin/posts/${id}`, data);
 export const adminDeletePost = (id) => api.delete(`/admin/posts/${id}`);
 export const adminGetContactMessages = (params) => api.get('/admin/contact-messages', { params });
+export const adminGetStats = () => api.get('/admin/stats');
 
 export default api;

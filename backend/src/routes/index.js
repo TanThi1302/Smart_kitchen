@@ -6,6 +6,7 @@ const categoryController = require('../controllers/categoryController');
 const orderController = require('../controllers/orderController');
 const postController = require('../controllers/postController');
 const contactController = require('../controllers/contactController');
+const statsController = require('../controllers/statsController');
 
 // Product routes
 router.get('/products', productController.getAllProducts);
@@ -53,5 +54,8 @@ router.delete('/admin/posts/:id', postController.deletePost);
 // Contact messages
 router.get('/admin/contact-messages', contactController.getAllContactMessages);
 router.put('/admin/contact-messages/:id/read', contactController.markMessageAsRead);
+
+// Stats
+router.get('/admin/stats', statsController.getDashboardStats);
 
 module.exports = router;
