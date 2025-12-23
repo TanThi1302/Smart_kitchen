@@ -1,5 +1,5 @@
 
-# Kitchen E-commerce Website - Malloca Clone
+# Kitchen E-commerce Website 
 
 Website thương mại điện tử bán thiết bị nhà bếp, xây dựng bằng React, Node.js, và PostgreSQL 16.
 
